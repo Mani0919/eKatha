@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,9 +18,15 @@ import {
   UpdatecutomerKatha,
 } from "../dB/operations";
 import RBSheet from "react-native-raw-bottom-sheet";
-
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { StatusBar } from "expo-status-bar";
+import { useNavigation } from "@react-navigation/native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 export default function CustomerKathas({ route }) {
-  const { customerid, customername } = route?.params;
+  const navigation = useNavigation();
+  const { customerid, customername, phone } = route?.params;
   const [customerKatha, setCustomerKatha] = useState({
     date: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
     products: "",
@@ -29,6 +36,7 @@ export default function CustomerKathas({ route }) {
   });
   const [data, setData] = useState([]);
   const refRBSheet = useRef();
+  const share = useRef();
   const [updateStatus, setUpdateStatus] = useState(false);
   const [updateid, setUpdateid] = useState("");
   const [totaldue, setTotaldue] = useState(0);
@@ -131,9 +139,54 @@ export default function CustomerKathas({ route }) {
   };
   return (
     <SafeAreaView>
+      {/* <StatusBar backgroundColor="black"  barStyle="light-content" /> */}
+      <View
+        style={{
+          backgroundColor: "white",
+          borderColor: "#D3D3D3", // light gray border
+          padding: 16,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: 0,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          elevation: 4,
+        }}
+      >
+        <View className="flex flex-row items-center gap-x-1">
+          <AntDesign
+            name="arrowleft"
+            size={24}
+            color="black"
+            onPress={() => navigation.goBack()}
+          />
+          <Text className="text-xl">Customer Katha</Text>
+        </View>
+        <Ionicons
+          name="share-social-outline"
+          size={24}
+          color="black"
+          onPress={() => share.current.open()}
+        />
+      </View>
       <View>
         <View className="flex flex-row justify-end p-2">
-          <Button title="Add katha" onPress={() => refRBSheet.current.open()} />
+          <Button
+            title="Add katha"
+            onPress={() => {
+              setCustomerKatha({
+                date:new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
+                products: "",
+                totalamount: "",
+                paid: "",
+                due: "",
+              })
+              refRBSheet.current.open();
+            }}
+          />
         </View>
       </View>
 
@@ -321,6 +374,67 @@ export default function CustomerKathas({ route }) {
             />
           </View>
         </ScrollView>
+      </RBSheet>
+
+      <RBSheet
+        ref={share}
+        useNativeDriver={true}
+        customStyles={{
+          container: {
+            height: 200,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+          },
+          draggableIcon: {
+            backgroundColor: "#000",
+          },
+        }}
+        draggable={true}
+        customModalProps={{
+          animationType: "slide",
+          statusBarTranslucent: true,
+        }}
+        customAvoidingViewProps={{
+          enabled: false,
+        }}
+      >
+        <View className="mt-1">
+          <Text className="p-2 font-bold text-[20px] ml-6">
+            Share katha with
+          </Text>
+        </View>
+        <View className="flex flex-row items-center gap-x-5 justify-start px-5 mt-3">
+          <TouchableOpacity
+            className="bg-green-500 p-2 px-3 rounded-full"
+            onPress={() => {
+              const phoneNumber = `${phone}`;
+              const message = `Hi,${customername} due amount to pay ${totaldue} `;
+              const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
+                message
+              )}`;
+              Linking.openURL(url).catch(() => {
+                alert("WhatsApp is not installed on your device");
+              });
+            }}
+          >
+            <FontAwesome name="whatsapp" size={44} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-gray-200 p-2  px-3  py-3 rounded-full"
+            onPress={() => {
+              const phoneNumber = `${phone}`;
+              const message = `Hi,${customername} due amount to pay ${totaldue} `;
+              const url = `sms:${phoneNumber}?body=${encodeURIComponent(
+                message
+              )}`;
+              Linking.openURL(url).catch(() => {
+                alert("WhatsApp is not installed on your device");
+              });
+            }}
+          >
+            <MaterialIcons name="textsms" size={38} color="black" />
+          </TouchableOpacity>
+        </View>
       </RBSheet>
     </SafeAreaView>
   );

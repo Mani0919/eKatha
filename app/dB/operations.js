@@ -59,6 +59,54 @@ export async function AllCustomers() {
   }
 }
 
+export async function UpdateCustomerData(id, name, phone, address) {
+  try {
+    const db = await dataBase;
+    const st = await db.prepareAsync(
+      `UPDATE customers SET name=$name,phone=$phone,address=$address WHERE id=$id`
+    );
+    try {
+      const res = await st.executeAsync({
+        $name: name,
+        $phone: phone,
+        $address: address,
+        $id: id,
+      });
+      if (res.changes > 0) {
+        console.log("Inserted successfully. Rows affected:", res.changes);
+        return true; // Indicates success
+      } else {
+        console.log("No rows were affected.");
+        return false; // Indicates no rows affected
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log("database error");
+  }
+}
+
+export async function DeleteCustomer(id) {
+  try {
+    const db = await dataBase;
+    const st = await db.prepareAsync(`DELETE FROM customers WHERE id=$id`);
+    try {
+      const res = await st.executeAsync({
+        $id: id,
+      });
+      if (res.changes > 0) {
+        console.log("Customer deleted successfully");
+      } else {
+        console.log("No rows matched for deletion");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
 //kath table
 export async function CustomerKatha(customerid, customername) {
   try {
@@ -142,7 +190,7 @@ export async function AllCustomersKatha(customerid, customername) {
   }
 }
 
-export async function DeleteCustomerKath(customerid,customername,id) {
+export async function DeleteCustomerKath(customerid, customername, id) {
   try {
     const db = await dataBase;
     const name = customername.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");
