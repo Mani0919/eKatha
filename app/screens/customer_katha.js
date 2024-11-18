@@ -21,7 +21,7 @@ import RBSheet from "react-native-raw-bottom-sheet";
 export default function CustomerKathas({ route }) {
   const { customerid, customername } = route?.params;
   const [customerKatha, setCustomerKatha] = useState({
-    date: "",
+    date: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
     products: "",
     totalamount: "",
     paid: "",
@@ -31,6 +31,7 @@ export default function CustomerKathas({ route }) {
   const refRBSheet = useRef();
   const [updateStatus, setUpdateStatus] = useState(false);
   const [updateid, setUpdateid] = useState("");
+  const [totaldue, setTotaldue] = useState(0);
   useEffect(() => {
     async function fun() {
       try {
@@ -74,6 +75,11 @@ export default function CustomerKathas({ route }) {
       try {
         const res = await AllCustomersKatha(customerid, customername);
         setData(res.length > 0 ? res : []);
+        let sum = 0;
+        res.map((item, _) => {
+          sum = sum + parseInt(item.due);
+        });
+        setTotaldue(sum);
       } catch (error) {
         console.log(error);
       }
@@ -131,6 +137,10 @@ export default function CustomerKathas({ route }) {
         </View>
       </View>
 
+      <View className="flex flex-row items-center gap-x-1 ml-2">
+        <Text className="text-[20px] font-bold">Total due amount to pay:</Text>
+        <Text className="text-[19px]">{totaldue}</Text>
+      </View>
       <View className="bg-gray-500 mx-2 mt-5 flex flex-row items-center rounded">
         <Text className="text-white text-lg px-2 w-[20%]">Date</Text>
         <Text className="text-white text-lg px-3 w-[23%]"> Products</Text>
@@ -266,7 +276,7 @@ export default function CustomerKathas({ route }) {
               onChangeText={(text) => {
                 const totalAmount = parseFloat(customerKatha.totalamount) || 0;
                 const paidAmount = parseFloat(text) || 0;
-          
+
                 if (paidAmount <= totalAmount) {
                   setCustomerKatha((prev) => ({
                     ...prev,
@@ -286,7 +296,7 @@ export default function CustomerKathas({ route }) {
               onChangeText={(text) => {
                 const totalAmount = parseFloat(customerKatha.totalamount) || 0;
                 const dueAmount = parseFloat(text) || 0;
-          
+
                 if (dueAmount <= totalAmount) {
                   setCustomerKatha((prev) => ({
                     ...prev,
