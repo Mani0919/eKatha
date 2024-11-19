@@ -15,6 +15,7 @@ import {
   CustomerKatha,
   DeleteCustomerKath,
   InsertCustomersKathaDeatils,
+  updateCustomerKathaSummary,
   UpdatecutomerKatha,
 } from "../dB/operations";
 import RBSheet from "react-native-raw-bottom-sheet";
@@ -70,6 +71,8 @@ export default function CustomerKathas({ route }) {
         customerKatha.paid,
         customerKatha.due
       );
+      const result = await updateCustomerKathaSummary(customerid, customername);
+
       refRBSheet.current.close();
     } catch (error) {
       console.log("err", error);
@@ -178,12 +181,14 @@ export default function CustomerKathas({ route }) {
             title="Add katha"
             onPress={() => {
               setCustomerKatha({
-                date:new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
+                date: new Date()
+                  .toLocaleDateString("en-GB")
+                  .replace(/\//g, "-"),
                 products: "",
                 totalamount: "",
                 paid: "",
                 due: "",
-              })
+              });
               refRBSheet.current.open();
             }}
           />

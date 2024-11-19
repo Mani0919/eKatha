@@ -11,6 +11,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   AllCustomers,
+  createCustomerKathaSummaryTable,
   createEntries,
   DeleteCustomer,
   InsertCustomersData,
@@ -40,7 +41,16 @@ export default function Customers_screen() {
     }
     fun();
     Customers();
+    fun1()
   }, []);
+  async function fun1()
+  {
+    try {
+      const res=await createCustomerKathaSummaryTable()
+    } catch (error) {
+      console.log(error)
+    }
+  }
   async function Customers() {
     try {
       const res = await AllCustomers();

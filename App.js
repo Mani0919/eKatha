@@ -7,12 +7,16 @@ import CustomerKathas from "./app/screens/customer_katha";
 import Home_screen from "./app/screens/home_screen";
 import Notes_screen from "./app/screens/notes_screen";
 import Singlenotes_screen from "./app/screens/singlenotes_screen";
+import Loginsignup_screen from "./app/screens/auth/loginsignup_screen";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="auth">
+        <Stack.Screen name="auth" component={Loginsignup_screen} options={{
+          headerShown:false
+        }}/>
         <Stack.Screen name="Home" component={Home_screen} options={{
           headerShown:false
         }}/>

@@ -42,7 +42,7 @@ export default function Singlenotes_screen({ route }) {
   };
   return (
     <SafeAreaView className="flex-1 ">
-      <View className="flex-1 justify-between">
+      <View className="flex-1 justify-between mt-5">
         <View>
           <View className="flex flex-row justify-end items-center gap-x-2 mr-3">
             <AntDesign

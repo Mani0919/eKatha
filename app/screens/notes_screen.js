@@ -79,7 +79,7 @@ export default function Notes_screen({ route }) {
   };
   return (
     <SafeAreaView>
-      <View className="border-[0.9px] border-gray-500 mx-10 p-2 rounded mb-3">
+      <View className="border-[0.9px] mt-10 border-gray-500 mx-10 p-2 rounded mb-3">
         <TextInput
           placeholder="Enter notes title"
           value={notes.title}
