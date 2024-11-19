@@ -1,5 +1,15 @@
-import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  StyleSheet,
+  TextInput,
+  Button,
+} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import img from "../assests/profile.png";
@@ -12,9 +22,13 @@ import {
   CreateNotes,
   getTopCustomersWithMoreKatha,
   SingleShopOwner,
+  UpdateShopOwner,
+  UpdateShopOwnerDetails,
 } from "../dB/operations";
 import { useNavigation } from "@react-navigation/native";
 import Entypo from "@expo/vector-icons/Entypo";
+import * as ImagePicker from "expo-image-picker";
+import RBSheet from "react-native-raw-bottom-sheet";
 export default function Home_screen({ route }) {
   const { title, subtitle, desc, message, id, phone } = route?.params || "";
   const { totalCustomers } = CustomerContext(Customer);
@@ -23,11 +37,26 @@ export default function Home_screen({ route }) {
   const [notes, setNotes] = useState([]);
   const [moreKatha, setMoreKatha] = useState([]);
   const [shopOwnerdetails, setShopownerDetails] = useState({});
+  const [toupdatedetails, setToupdateDetails] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    shopname: "",
+  });
   useEffect(() => {
     async function fun() {
       try {
         const res = await SingleShopOwner(phone);
         setShopownerDetails(res[0]);
+        setImage(res[0].pic);
+        setToupdateDetails({
+          name: res[0].fullname,
+          email: res[0].email,
+          phone: res[0].phone,
+          address: res[0].address,
+          shopname: res[0].shopname,
+        });
       } catch (error) {
         console.log(error);
       }
@@ -90,6 +119,61 @@ export default function Home_screen({ route }) {
     "#dbb6d3",
     "#6e3823",
   ];
+  const [visible, setVisible] = useState(false);
+  const [image, setImage] = useState("");
+
+  const handleLogout = () => {
+    navigation.navigate("auth");
+  };
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        alert("Sorry, we need camera permissions to make this work!");
+      }
+    })();
+  }, []);
+
+  const openCamera = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      const uri = result.assets ? result.assets[0].uri : result.uri;
+      console.log(uri);
+      setImage(uri);
+      await UpdateShopOwner(uri, shopOwnerdetails.id);
+    }
+  };
+  const refRBSheet = useRef();
+
+  const handelUpdateOwner = async () => {
+    try {
+      setShopownerDetails({
+        fullname: toupdatedetails.name,
+        shopname: toupdatedetails.shopname,
+        address: toupdatedetails.address,
+      });
+      const res = await UpdateShopOwnerDetails(
+        toupdatedetails.name,
+        toupdatedetails.phone,
+        toupdatedetails.email,
+        toupdatedetails.address,
+        toupdatedetails.shopname,
+        shopOwnerdetails.id
+      );
+      if (res) {
+        refRBSheet.current.close();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <SafeAreaView>
       <ScrollView>
@@ -97,13 +181,21 @@ export default function Home_screen({ route }) {
           <View>
             <Text className="text-[23px]">Hi,{shopOwnerdetails.fullname}</Text>
             <Text className="text-[20px]">{shopOwnerdetails.shopname}</Text>
-            <Text className="text-[16px]">Tekkalipatnam village</Text>
+            <Text className="text-[16px]">{shopOwnerdetails.address}</Text>
           </View>
-          <Image source={img} className="w-14 h-14" />
+          <TouchableOpacity onPress={() => setVisible(true)}>
+            {image === "" ? (
+              <Image source={img} className="w-14 h-14" />
+            ) : (
+              <Image
+                source={{ uri: image }}
+                className="w-20 h-20 rounded-full"
+              />
+            )}
+          </TouchableOpacity>
         </View>
         <View className="p-2 mx-2 mt-5 flex flex-row justify-between items-center">
-          <Text className="text-[20px] font-bold">Frequent csutomers</Text>
-          {/* <Text className="text-blue-600 text-[23px]">Add+</Text> */}
+          <Text className="text-[20px] font-bold">Frequent customers</Text>
         </View>
         {moreKatha.length > 0 ? (
           <View>
@@ -217,7 +309,160 @@ export default function Home_screen({ route }) {
           <Text className="text-[25px] font-bold">{totalCustomer}</Text>
           <Text className="font-bold text-[20px]">Total Customers</Text>
         </TouchableOpacity>
+
+        <Modal
+          transparent={true}
+          visible={visible}
+          animationType="slide"
+          onRequestClose={() => setVisible(false)}
+        >
+          <View style={styles.overlay}>
+            <View style={styles.drawer}>
+              <TouchableOpacity onPress={() => setVisible(false)}>
+                <Text style={styles.closeButton}>X</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.option} onPress={openCamera}>
+                <Text>Edit Profile Image</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.option}
+                onPress={() => refRBSheet.current.open()}
+              >
+                <Text>Edit Profile details</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.option}
+                onPress={() => {
+                  /* Add Logout logic */
+                  handleLogout();
+                }}
+              >
+                <Text>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        <RBSheet
+          ref={refRBSheet}
+          useNativeDriver={true}
+          customStyles={{
+            container: {
+              height: 375,
+              borderBottomLeftRadius: 20,
+              borderBottomRightRadius: 20,
+              position: "absolute",
+              top: 0,
+            },
+            // draggableIcon: {
+            //   backgroundColor: "#000",
+            // },
+          }}
+          // draggable={true}
+          customModalProps={{
+            animationType: "slide",
+            statusBarTranslucent: true,
+          }}
+          customAvoidingViewProps={{
+            enabled: false,
+          }}
+        >
+          <View className="mt-10 mx-auto mb-2">
+            <Text className="font-bold text-[20px]">Update profile details</Text>
+          </View>
+          <View className="border-[0.8px] border-gray-400 mx-10 rounded p-2 ">
+            <TextInput
+              placeholder="Enter fullname"
+              value={toupdatedetails.name}
+              onChangeText={(text) => {
+                setToupdateDetails((prev) => {
+                  return {
+                    ...prev,
+                    name: text,
+                  };
+                });
+              }}
+            />
+          </View>
+          <View className="border-[0.8px] border-gray-400 mx-10 rounded p-2 mt-2">
+            <TextInput
+              placeholder="Enter phonenumber"
+              keyboardType="numeric"
+              value={toupdatedetails.phone}
+              onChangeText={(text) => {
+                setToupdateDetails((prev) => {
+                  return {
+                    ...prev,
+                    phone: text,
+                  };
+                });
+              }}
+            />
+          </View>
+          <View className="border-[0.8px] border-gray-400 mx-10 rounded p-2 mt-2">
+            <TextInput
+              placeholder="Enter email"
+              value={toupdatedetails.email}
+              onChangeText={(text) => {
+                setToupdateDetails((prev) => {
+                  return {
+                    ...prev,
+                    email: text,
+                  };
+                });
+              }}
+            />
+          </View>
+          <View className="border-[0.8px] border-gray-400 mx-10 rounded p-2 mt-2">
+            <TextInput
+              placeholder="Enter address"
+              value={toupdatedetails.address}
+              onChangeText={(text) => {
+                setToupdateDetails((prev) => {
+                  return {
+                    ...prev,
+                    address: text,
+                  };
+                });
+              }}
+            />
+          </View>
+          <View className="border-[0.8px] border-gray-400 mx-10 rounded p-2 mt-2">
+            <TextInput
+              placeholder="Enter shopname"
+              value={toupdatedetails.shopname}
+              onChangeText={(text) => {
+                setToupdateDetails((prev) => {
+                  return {
+                    ...prev,
+                    shopname: text,
+                  };
+                });
+              }}
+            />
+          </View>
+          <View className="mx-16 mt-2">
+            <Button title="Update" onPress={handelUpdateOwner} />
+          </View>
+        </RBSheet>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  icon: { fontSize: 24, margin: 10 },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  drawer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+  },
+  closeButton: { alignSelf: "flex-end", fontSize: 24, marginBottom: 10 },
+  option: { marginVertical: 10 },
+});

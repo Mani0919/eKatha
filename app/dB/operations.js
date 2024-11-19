@@ -571,3 +571,63 @@ export async function SingleShopOwner(phone) {
     console.log(error);
   }
 }
+
+export async function UpdateShopOwner(pic, id) {
+  try {
+    const db = await dataBase;
+    const st = await db.prepareAsync(
+      `UPDATE shopowners SET pic=$pic WHERE id=$id`
+    );
+    try {
+      const res = await st.executeAsync({
+        $pic: pic,
+        $id: id,
+      });
+      if (res.changes > 0) {
+        console.log("Updated");
+      } else {
+        console.log("no");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function UpdateShopOwnerDetails(
+  name,
+  phone,
+  email,
+  address,
+  shopname,
+  id
+) {
+  try {
+    const db = await dataBase;
+    const st = await db.prepareAsync(
+      `UPDATE shopowners SET fullname=$name,phone=$phone,email=$email,address=$address,shopname=$shopname WHERE id=$id`
+    );
+    try {
+      const res = await st.executeAsync({
+        $name: name,
+        $phone: phone,
+        $email: email,
+        $address: address,
+        $shopname: shopname,
+        $id: id,
+      });
+      if (res.changes > 0) {
+        console.log("Updated details");
+        return res
+      } else {
+        console.log("no");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
