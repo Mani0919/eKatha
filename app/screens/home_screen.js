@@ -1,18 +1,33 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import img from "../assests/profile.png";
 import noimg from "../assests/noimg.png";
 import CustomerContext, { Customer } from "../useContext/context";
-import { AllCustomers } from "../dB/operations";
+import { AllCustomers, Allnotes, CreateNotes } from "../dB/operations";
 import { useNavigation } from "@react-navigation/native";
-export default function Home_screen() {
+import Entypo from "@expo/vector-icons/Entypo";
+export default function Home_screen({ route }) {
+  const { title, subtitle, desc, message, id } = route?.params || "";
   const { totalCustomers } = CustomerContext(Customer);
   const navigation = useNavigation();
   const [totalCustomer, setTotal] = useState("");
+  const [notes, setNotes] = useState([]);
   useEffect(() => {
     // console.log(totalCustomers);
+    if (title && subtitle && desc) {
+      const newData = {
+        title: title,
+        subtitle: subtitle,
+        description: desc,
+      };
+
+      setNotes((prevData) => [...prevData, newData]);
+    }
+    if (message && id) {
+      setNotes((prev) => prev.filter((customer) => customer.id !== id));
+    }
     async function fun() {
       try {
         const res = await AllCustomers();
@@ -20,10 +35,36 @@ export default function Home_screen() {
       } catch (error) {}
     }
     fun();
-  }, []);
+    fun1();
+    fun2();
+  }, [title, subtitle, desc, message, id]);
+  async function fun1() {
+    try {
+      const res = await CreateNotes();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function fun2() {
+    try {
+      const res = await Allnotes();
+      setNotes(res);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const color = [
+    "#fa5cda",
+    "#038cfc",
+    "#13e861",
+    "#bb3ce6",
+    "#dbb6d3",
+    "#6e3823",
+  ];
   return (
     <SafeAreaView>
-      <View>
+      <ScrollView>
         <View className="p-2 mx-5 flex flex-row justify-between items-center">
           <View>
             <Text>Hi,Manikanta</Text>
@@ -40,11 +81,61 @@ export default function Home_screen() {
         </View>
         <View className="p-2 mx-5 mt-5 flex flex-row justify-between items-center">
           <Text className="text-[20px] font-bold">Add Notes</Text>
-          <Text className="text-blue-600 text-[23px]">Add+</Text>
+          <Text
+            className="text-blue-600 text-[23px]"
+            onPress={() => navigation.navigate("Notes")}
+          >
+            Add+
+          </Text>
         </View>
-        <View className="mx-auto p-10">
-          <Image source={noimg} className="w-32 h-32" />
-        </View>
+        {notes.length > 0 ? (
+          <ScrollView horizontal className="p-2 ">
+            {notes.map((item, index) => {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={{
+                    backgroundColor: color[index % color.length],
+                    borderColor: "#D3D3D3",
+                    padding: 16,
+                    marginTop: 0,
+                    shadowColor: "#000",
+                    shadowOpacity: 0.2,
+                    shadowRadius: 4,
+                    elevation: 4,
+                  }}
+                  className="p-5 mx-2  mb-10 rounded-xl relative"
+                  onPress={() =>
+                    navigation.navigate("Single_notes", {
+                      id: item.id,
+                    })
+                  }
+                >
+                  <Text className="text-[23px]">{item.title}</Text>
+                  <Text className="text-[20px] text-gray-400">
+                    {item.subtitle}
+                  </Text>
+                  <Text className="w-52 h-32 ">{item.description}</Text>
+                  <View className="flex flex-row justify-between items-center -mr-2">
+                    <View className="flex flex-row items-center">
+                      <Text className="text-lg">Created at:</Text>
+                      <Text className="text-[17px] ml-1">
+                        {item.createddate}
+                      </Text>
+                    </View>
+                    <View className="bg-gray-400 rounded-full p-2">
+                      <Entypo name="edit" size={20} color="black" />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        ) : (
+          <View className="mx-auto p-10">
+            <Image source={noimg} className="w-32 h-32" />
+          </View>
+        )}
         <TouchableOpacity
           style={{
             backgroundColor: "white",
@@ -56,13 +147,13 @@ export default function Home_screen() {
             shadowRadius: 4,
             elevation: 4,
           }}
-          className="p-5 w-44 flex flex-col mx-2 rounded items-start justify-start py-5"
+          className="p-5 w-44 flex flex-col mx-2 mb-10 rounded items-start justify-start py-5"
           onPress={() => navigation.navigate("Customers")}
         >
           <Text className="text-[25px] font-bold">{totalCustomer}</Text>
           <Text className="font-bold text-[20px]">Total Customers</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

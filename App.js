@@ -5,6 +5,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import Customers_screen from "./app/screens/customers_screen";
 import CustomerKathas from "./app/screens/customer_katha";
 import Home_screen from "./app/screens/home_screen";
+import Notes_screen from "./app/screens/notes_screen";
+import Singlenotes_screen from "./app/screens/singlenotes_screen";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -23,6 +25,10 @@ export default function App() {
             title: "Customer Katha",
           }}
         />
+        <Stack.Screen name="Notes" component={Notes_screen}/>
+        <Stack.Screen name="Single_notes" component={Singlenotes_screen} options={{
+          title:"Notes Details"
+        }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

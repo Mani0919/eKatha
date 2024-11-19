@@ -253,3 +253,134 @@ export async function UpdatecutomerKatha(
     console.log(error);
   }
 }
+
+//notes
+export async function CreateNotes() {
+  try {
+    const db = await dataBase;
+    await db.execAsync(`
+         PRAGMA journal_mode = WAL;
+      CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT  NOT NULL , title TEXT NOT NULL, subtitle TEXT NOT NULL, description TEXT NOT NULL, createddate TEXT )`);
+    const columns = await db.getAllAsync(`PRAGMA table_info(notes);`);
+    const columnNames = columns.map((col) => col.name);
+    console.log("Existing columns:", columnNames);
+    if (!columnNames.includes("createddate")) {
+      await db.execAsync(`ALTER TABLE notes ADD COLUMN createddate TEXT;`);
+      console.log("Added missing 'createddate' column");
+    }
+    if (!columnNames.includes("editeddate")) {
+      await db.execAsync(`ALTER TABLE notes ADD COLUMN editeddate TEXT;`);
+      console.log("Added missing 'editeddate' column");
+    }
+    console.log("Note table created");
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function InsertNotes(title, subtitle, desc, date) {
+  try {
+    const db = await dataBase;
+    const st = await db.prepareAsync(
+      `INSERT INTO notes(title,subtitle,description,createddate) VALUES($title,$subtitle,$desc,$date)`
+    );
+    try {
+      const res = await st.executeAsync({
+        $title: title,
+        $subtitle: subtitle,
+        $desc: desc,
+        $date: date,
+      });
+      if (res.changes > 0) {
+        console.log("Inserted notes data");
+        return res;
+      } else {
+        console.log("not Inserted notes data");
+      }
+    } catch (error) {
+      console.log("err", error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function Allnotes() {
+  try {
+    const db = await dataBase;
+    try {
+      const res = await db.getAllAsync(`SELECT * FROM notes`);
+      console.log(res);
+      return res;
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function SingleNOte(id) {
+  try {
+    const db = await dataBase;
+    const st = await db.prepareAsync(`SELECT * FROM notes WHERE id=$id`);
+    try {
+      const res = await st.executeAsync({
+        $id: id,
+      });
+      const rows = await res.getAllAsync();
+      console.log(rows);
+      return rows;
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function UpdateNotes(title, subtitle, desc, date, id) {
+  try {
+    const db = await dataBase;
+    const st = await db.prepareAsync(
+      `UPDATE notes SET title=$title,subtitle=$subtitle,description=$desc,editeddate=$date WHERE id=$id`
+    );
+    try {
+      const res = await st.executeAsync({
+        $title: title,
+        $subtitle: subtitle,
+        $desc: desc,
+        $date: date,
+        $id: id,
+      });
+      console.log("Product Updated");
+      return res;
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function DeleteNotes(id) {
+  try {
+    const db = await dataBase;
+    const st = await db.prepareAsync(`DELETE FROM notes WHERE id=$id`);
+    try {
+      const res = await st.executeAsync({
+        $id: id,
+      });
+      if (res.changes > 0) {
+        console.log("Note deleted successfully");
+        return res;
+      } else {
+        console.log("No rows matched for deletion");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
