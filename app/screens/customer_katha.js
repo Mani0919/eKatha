@@ -47,7 +47,6 @@ export default function CustomerKathas({ route }) {
   const [updateid, setUpdateid] = useState("");
   const [totaldue, setTotaldue] = useState(0);
   useEffect(() => {
-    console.log("sssssssssssssssssssss", customerid, customername);
     async function fun() {
       try {
         const res = CustomerKatha(customerid, customername);

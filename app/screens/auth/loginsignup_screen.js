@@ -94,6 +94,7 @@ export default function Loginsignup_screen() {
           );
           if (res) {
             Alert.alert("Registred");
+            setToggle(true)
           } else {
             Alert.alert("Something went wrong");
           }

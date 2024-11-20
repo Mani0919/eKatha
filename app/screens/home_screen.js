@@ -191,7 +191,7 @@ export default function Home_screen({ route }) {
           <View>
             <Text className="text-[23px]">Hi,{shopOwnerdetails.fullname}</Text>
             <Text className="text-[20px]">{shopOwnerdetails.shopname}</Text>
-            <Text className="text-[16px]">{shopOwnerdetails.address}</Text>
+            <Text className="text-[16px] w-52">{shopOwnerdetails.address}</Text>
           </View>
           <TouchableOpacity onPress={() => setVisible(true)}>
             {!image ? (
@@ -210,9 +210,9 @@ export default function Home_screen({ route }) {
         {moreKatha.length > 0 ? (
           <View>
             <View className="bg-gray-500 mx-2 mt-2 flex flex-row items-center rounded">
-              <Text className="text-white text-xl px-5 w-[20%]">S.No</Text>
-              <Text className="text-white text-xl px-3 w-[30%]">Name</Text>
-              <Text className="text-white text-xl px-3 w-[23%]">Phone</Text>
+              <Text className="text-white text-xl px-3 w-[21%]">S.No</Text>
+              <Text className="text-white text-xl px-1 w-[25%]">Name</Text>
+              <Text className="text-white text-xl px-2 w-[23%]">Phone</Text>
               <Text className="text-white text-xl px-3 w-[34%]">Address</Text>
             </View>
             {moreKatha.map((item, index) => {
@@ -228,8 +228,8 @@ export default function Home_screen({ route }) {
                   }
                 >
                   <Text className="w-[20%] px-6 text-lg">{index + 1}</Text>
-                  <Text className="w-[30%] px-2 text-lg">{item.name}</Text>
-                  <Text className="w-[22%] px-2 text-lg">{item.phone}</Text>
+                  <Text className="w-[27%] px-2 text-lg">{item.name}</Text>
+                  <Text className="w-[22%] px-1 text-lg">{item.phone}</Text>
                   <Text className="w-[35%] px-3 text-lg">
                     {" "}
                     {item.address.length > 10

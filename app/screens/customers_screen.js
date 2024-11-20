@@ -8,7 +8,7 @@ import {
   Alert,
   Image,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   AllCustomers,
@@ -22,7 +22,7 @@ import { useNavigation } from "@react-navigation/native";
 import RBSheet from "react-native-raw-bottom-sheet";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import CustomerContext, { Customer } from "../useContext/context";
+import { Customer } from "../useContext/context";
 import Animated, {
   SlideInDown,
   SlideInUp,
@@ -39,7 +39,7 @@ export default function Customers_screen() {
   const [data, setData] = useState([]);
   const [updateStatus, setUpdateStatus] = useState(false);
   const [customerid, setCustomerid] = useState("");
-  const { FindTotalCustomers } = CustomerContext(Customer);
+  const { setCustomerDetails } = useContext(Customer);
   useEffect(() => {
     async function fun() {
       try {
@@ -50,6 +50,7 @@ export default function Customers_screen() {
     Customers();
     fun1();
   }, []);
+
   async function fun1() {
     try {
       const res = await createCustomerKathaSummaryTable();
@@ -66,15 +67,11 @@ export default function Customers_screen() {
       console.log(error);
     }
   }
-  const refRBSheet = useRef();
+
   const InsertCustomers = async () => {
     try {
-      const customer = {
-        name: customerData.name,
-        phone: customerData.phone,
-        address: customerData.address,
-      };
-      setData((prevData) => [...prevData, customer]);
+  
+      // setData((prevData) => [...prevData, customer]);
       const res = await InsertCustomersData(
         customerData.name,
         customerData.phone,
@@ -87,10 +84,11 @@ export default function Customers_screen() {
           address: "",
         });
       }
+      await Customers();
     } catch (error) {}
   };
   const UpdateCustomer = async () => {
-    console.log(customerid,"updated")
+    console.log(customerid, "updated");
     try {
       setData((prevData) =>
         prevData.map((item) =>
@@ -110,13 +108,17 @@ export default function Customers_screen() {
         customerData.phone,
         customerData.address
       );
-      refRBSheet.current.close();
+      if (res) {
+        setModalVisible(false);
+      } else {
+        Alert.alert("something went wrong");
+      }
     } catch (error) {
       console.log(error);
     }
   };
   const handleDelete = async (id) => {
-    console.log(id,"ddeeleldele")
+    console.log(id, "ddeeleldele");
     try {
       setData((prev) => prev.filter((customer) => customer.id !== id));
       const res = await DeleteCustomer(id);
@@ -132,6 +134,13 @@ export default function Customers_screen() {
     );
   });
   const [modalVisible, setModalVisible] = useState(false);
+
+  const handleCustomerDetails = (id, name) => {
+    navigation.navigate("manuplate", {
+      customerid: id,
+      customername: name,
+    });
+  };
   return (
     <SafeAreaView className="flex-1">
       <ScrollView>
@@ -209,12 +218,7 @@ export default function Customers_screen() {
                     </Text>
                     <View
                       className=" mx-auto"
-                      onPress={() =>
-                        navigation.navigate("manuplate", {
-                          customerid: item.id,
-                          customername: item.name,
-                        })
-                      }
+                      onPress={() => handleCustomerDetails(item.id, item.name)}
                     >
                       <AntDesign
                         name="eyeo"
@@ -268,6 +272,7 @@ export default function Customers_screen() {
                   placeholder="Enter Customer Phone"
                   value={customerData.phone}
                   keyboardType="numeric"
+                  maxLength={10}
                   onChangeText={(text) =>
                     setCustomerdata((prev) => ({ ...prev, phone: text }))
                   }
