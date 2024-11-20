@@ -3,6 +3,13 @@
 **Shop Katha Book** is a handy application for shop owners to manage customer details and track individual transactions or "kathas" on specific dates. It also features a convenient Home tab to organize notes for important tasks, making it a comprehensive tool for business management.
 
 --
+## Download & Explore the App 📲
+ You can download and try the **Shop Katha Book** app using the link below:
+ - **[Download APK](https://expo.dev/accounts/eashan20/projects/eKathaBook/builds/3dc129e8-9b1e-429d-aa78-8980e757b558)**
+
+Simply click the link, install the APK, and start managing your shop effortlessly!
+
+---
 
 ## Features ✨
 
