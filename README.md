@@ -25,8 +25,8 @@
 ## Installation & Setup 🚀
 
 1. Clone the repository:
-
-  git clone https://github.com/Mani0919/eKatha.git
+    ```
+   git clone https://github.com/Mani0919/eKatha.git
 
 3. Navigate to the project directory:
    ```bash
