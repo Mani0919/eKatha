@@ -14,13 +14,29 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="">
-        <Stack.Screen name="auth" component={Loginsignup_screen} options={{
-          headerShown:false
-        }}/>
-        <Stack.Screen name="Home" component={Home_screen} options={{
-          headerShown:false
-        }}/>
-        <Stack.Screen name="Customers" component={Customers_screen} />
+        <Stack.Screen
+          name="auth"
+          component={Loginsignup_screen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={Home_screen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Customers"
+          component={Customers_screen}
+          // options={{
+          //   headerSearchBarOptions: {
+          //     placeholder: "Search katha",
+          //   },
+          // }}
+        />
         <Stack.Screen
           name="manuplate"
           component={CustomerKathas}
@@ -29,10 +45,14 @@ export default function App() {
             title: "Customer Katha",
           }}
         />
-        <Stack.Screen name="Notes" component={Notes_screen}/>
-        <Stack.Screen name="Single_notes" component={Singlenotes_screen} options={{
-          title:"Notes Details"
-        }}/>
+        <Stack.Screen name="Notes" component={Notes_screen} />
+        <Stack.Screen
+          name="Single_notes"
+          component={Singlenotes_screen}
+          options={{
+            title: "Notes Details",
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

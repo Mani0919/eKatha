@@ -25,6 +25,7 @@ import { StatusBar } from "expo-status-bar";
 import { useNavigation } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+
 export default function CustomerKathas({ route }) {
   const navigation = useNavigation();
   const { customerid, customername, phone } = route?.params;

@@ -22,6 +22,11 @@ import RBSheet from "react-native-raw-bottom-sheet";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import CustomerContext, { Customer } from "../useContext/context";
+import Animated, {
+  SlideInDown,
+  SlideInUp,
+  SlideOutUp,
+} from "react-native-reanimated";
 export default function Customers_screen() {
   const navigation = useNavigation();
   const [customerData, setCustomerdata] = useState({
@@ -41,14 +46,13 @@ export default function Customers_screen() {
     }
     fun();
     Customers();
-    fun1()
+    fun1();
   }, []);
-  async function fun1()
-  {
+  async function fun1() {
     try {
-      const res=await createCustomerKathaSummaryTable()
+      const res = await createCustomerKathaSummaryTable();
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
   async function Customers() {
@@ -123,9 +127,9 @@ export default function Customers_screen() {
       value.phone.toLowerCase().includes(Search.toLowerCase())
     );
   });
-
+  const [modalVisible, setModalVisible] = useState(false);
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1">
       <ScrollView>
         <View className="felx flex-row justify-end p-2">
           <Button
@@ -136,7 +140,8 @@ export default function Customers_screen() {
                 phone: "",
                 address: "",
               });
-              refRBSheet.current.open();
+              // refRBSheet.current.open();
+              setModalVisible(true);
             }}
           />
         </View>
@@ -177,7 +182,8 @@ export default function Customers_screen() {
                             phone: item.phone,
                             address: item.address,
                           });
-                          refRBSheet.current.open();
+                          // refRBSheet.current.open();
+                          setModalVisible(true);
                         },
                       },
                       {
@@ -221,95 +227,72 @@ export default function Customers_screen() {
           })}
         </View>
       </ScrollView>
-
-      <RBSheet
-        ref={refRBSheet}
-        useNativeDriver={true}
-        customStyles={{
-          container: {
-            height: 320,
-            borderBottomLeftRadius: 20,
-            borderBottomRightRadius: 20,
-            position: "absolute",
-            top: 0,
-          },
-          // draggableIcon: {
-          //   backgroundColor: "#000",
-          // },
-        }}
-        // draggable={true}
-        customModalProps={{
-          animationType: "slide",
-          statusBarTranslucent: true,
-        }}
-        customAvoidingViewProps={{
-          enabled: false,
-        }}
-      >
-        <ScrollView className="mt-10">
-          <Text className="p-2 font-bold text-[20px] ml-6">
-            Add/Update Customer Details
-          </Text>
-          <View className="border-[0.8px] border-gray-400 p-2 mx-10 rounded mb-3">
-            <TextInput
-              placeholder="Enter Customername"
-              value={customerData.name}
-              maxLength={30}
-              onChangeText={(text) => {
-                setCustomerdata((prev) => {
-                  return {
-                    ...prev,
-                    name: text,
-                  };
-                });
-              }}
-            />
-          </View>
-          <View className="border-[0.8px] border-gray-400 p-2 mx-10 rounded mb-3">
-            <TextInput
-              placeholder="Enter Customer phone number"
-              keyboardType="numeric"
-              maxLength={10}
-              value={customerData.phone}
-              onChangeText={(text) => {
-                setCustomerdata((prev) => {
-                  return {
-                    ...prev,
-                    phone: text,
-                  };
-                });
-              }}
-            />
-          </View>
-          <View className="border-[0.8px] border-gray-400 p-2 mx-10 rounded mb-3">
-            <TextInput
-              placeholder="Enter Customer address"
-              value={customerData.address}
-              maxLength={100}
-              onChangeText={(text) => {
-                setCustomerdata((prev) => {
-                  return {
-                    ...prev,
-                    address: text,
-                  };
-                });
-              }}
-            />
-          </View>
-          <View className="mx-20 rounded-2xl">
-            <Button
-              title="Submit"
-              onPress={() => {
-                if (!updateStatus) {
-                  InsertCustomers();
-                } else {
-                  UpdateCustomer();
-                }
-              }}
-            />
-          </View>
-        </ScrollView>
-      </RBSheet>
+  
+      {modalVisible && (
+        <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/20 justify-center items-center">
+          <Animated.View
+            entering={SlideInUp.duration(300)} // Slide from bottom to top
+            exiting={SlideOutUp.duration(300)} // Slide up to dismiss
+            className="absolute top-0 left-0 right-0 bg-white rounded-b-2xl p-6 shadow-lg"
+          >
+            <ScrollView>
+              <Text className="text-lg font-bold mb-4">
+                Add/Update Customer Details
+              </Text>
+              <View className="border-[0.9px] border-gray-400 rounded mb-4 p-3">
+                <TextInput
+                  placeholder="Enter Customer Name"
+                  value={customerData.name}
+                  onChangeText={(text) =>
+                    setCustomerdata((prev) => ({ ...prev, name: text }))
+                  }
+                />
+              </View>
+              <View className="border-[0.9px] border-gray-400 rounded mb-4 p-3">
+                <TextInput
+                  placeholder="Enter Customer Phone"
+                  value={customerData.phone}
+                  keyboardType="numeric"
+                  onChangeText={(text) =>
+                    setCustomerdata((prev) => ({ ...prev, phone: text }))
+                  }
+                />
+              </View>
+              <View className="border-[0.9px] border-gray-400 rounded mb-4 p-3">
+                <TextInput
+                  placeholder="Enter Customer Address"
+                  value={customerData.address}
+                  onChangeText={(text) =>
+                    setCustomerdata((prev) => ({ ...prev, address: text }))
+                  }
+                />
+              </View>
+              <View className="rounded-2xl mb-4 w-full flex flex-row justify-between items-center">
+                <View className="p-2 w-36 rounded">
+                  <Button
+                    title="Close"
+                    onPress={() => setModalVisible(false)}
+                    color="red"
+                  />
+                </View>
+                <View className="p-2 w-36 rounded">
+                  <Button
+                    title="Submit"
+                    onPress={() => {
+                      if (!updateStatus) {
+                        InsertCustomers();
+                      } else {
+                        UpdateCustomer();
+                      }
+                      setModalVisible(false);
+                    }}
+                  />
+                </View>
+              </View>
+            </ScrollView>
+          </Animated.View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

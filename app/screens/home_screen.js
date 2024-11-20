@@ -29,6 +29,12 @@ import { useNavigation } from "@react-navigation/native";
 import Entypo from "@expo/vector-icons/Entypo";
 import * as ImagePicker from "expo-image-picker";
 import RBSheet from "react-native-raw-bottom-sheet";
+import Animated, {
+  SlideInDown,
+  SlideInUp,
+  SlideOutUp,
+} from "react-native-reanimated";
+
 export default function Home_screen({ route }) {
   const { title, subtitle, desc, message, id, phone } = route?.params || "";
   const { totalCustomers } = CustomerContext(Customer);
@@ -44,6 +50,7 @@ export default function Home_screen({ route }) {
     address: "",
     shopname: "",
   });
+  const [modalVisible, setModalVisible] = useState(false);
   useEffect(() => {
     async function fun() {
       try {
@@ -245,7 +252,11 @@ export default function Home_screen({ route }) {
           </Text>
         </View>
         {notes.length > 0 ? (
-          <ScrollView horizontal className="p-2 ">
+          <ScrollView
+            horizontal
+            className="p-2 "
+            showsHorizontalScrollIndicator={false}
+          >
             {notes.map((item, index) => {
               return (
                 <TouchableOpacity
@@ -326,7 +337,10 @@ export default function Home_screen({ route }) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.option}
-                onPress={() => refRBSheet.current.open()}
+                onPress={() => {
+                  setModalVisible(true);
+                  setVisible(false);
+                }}
               >
                 <Text>Edit Profile details</Text>
               </TouchableOpacity>
@@ -342,7 +356,7 @@ export default function Home_screen({ route }) {
             </View>
           </View>
         </Modal>
-
+        {/* 
         <RBSheet
           ref={refRBSheet}
           useNativeDriver={true}
@@ -444,7 +458,102 @@ export default function Home_screen({ route }) {
           <View className="mx-16 mt-2">
             <Button title="Update" onPress={handelUpdateOwner} />
           </View>
-        </RBSheet>
+        </RBSheet> */}
+
+        {modalVisible && (
+          <View className="absolute top-0  left-0 right-0 bottom-0 bg-black/20 justify-center items-center">
+            <Animated.View
+              entering={SlideInUp.duration(300)}
+              exiting={SlideOutUp.duration(300)}
+              className="absolute top-0 left-0 right-0 bg-white rounded-b-2xl p-6 shadow-lg"
+            >
+              <ScrollView>
+                <Text className="text-lg font-bold mb-4">
+                  Update profile details
+                </Text>
+                <View className="border-[0.8px] border-gray-400 mx-6 rounded p-2">
+                  <TextInput
+                    placeholder="Enter fullname"
+                    value={toupdatedetails.name}
+                    onChangeText={(text) =>
+                      setToupdateDetails((prev) => ({
+                        ...prev,
+                        name: text,
+                      }))
+                    }
+                  />
+                </View>
+                <View className="border-[0.8px] border-gray-400 mx-6 rounded p-2 mt-2">
+                  <TextInput
+                    placeholder="Enter phonenumber"
+                    keyboardType="numeric"
+                    value={toupdatedetails.phone}
+                    onChangeText={(text) =>
+                      setToupdateDetails((prev) => ({
+                        ...prev,
+                        phone: text,
+                      }))
+                    }
+                  />
+                </View>
+                <View className="border-[0.8px] border-gray-400 mx-6 rounded p-2 mt-2">
+                  <TextInput
+                    placeholder="Enter email"
+                    value={toupdatedetails.email}
+                    onChangeText={(text) =>
+                      setToupdateDetails((prev) => ({
+                        ...prev,
+                        email: text,
+                      }))
+                    }
+                  />
+                </View>
+                <View className="border-[0.8px] border-gray-400 mx-6 rounded p-2 mt-2">
+                  <TextInput
+                    placeholder="Enter address"
+                    value={toupdatedetails.address}
+                    onChangeText={(text) =>
+                      setToupdateDetails((prev) => ({
+                        ...prev,
+                        address: text,
+                      }))
+                    }
+                  />
+                </View>
+                <View className="border-[0.8px] border-gray-400 mx-6 rounded p-2 mt-2">
+                  <TextInput
+                    placeholder="Enter shopname"
+                    value={toupdatedetails.shopname}
+                    onChangeText={(text) =>
+                      setToupdateDetails((prev) => ({
+                        ...prev,
+                        shopname: text,
+                      }))
+                    }
+                  />
+                </View>
+                <View className="mx-6 mt-2 flex flex-row justify-between items-center">
+                  <View className="p-2 w-32">
+                    <Button
+                      title="Close"
+                      onPress={() => setModalVisible(false)}
+                      color="red"
+                    />
+                  </View>
+                  <View className="p-2 w-32">
+                    <Button
+                      title="Update"
+                      onPress={() => {
+                        handelUpdateOwner();
+                        setModalVisible(false);
+                      }}
+                    />
+                  </View>
+                </View>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
