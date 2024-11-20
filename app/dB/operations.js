@@ -143,6 +143,7 @@ export async function InsertCustomersKathaDeatils(
   paid,
   due
 ) {
+  console.log("Startedddddddddd")
   try {
     const db = await dataBase;
     const name = customername.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");
@@ -175,6 +176,7 @@ export async function InsertCustomersKathaDeatils(
 }
 
 export async function AllCustomersKatha(customerid, customername) {
+  console.log("all",customerid,customername)
   try {
     const db = await dataBase;
     const name = customername.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");

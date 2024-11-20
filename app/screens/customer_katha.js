@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   AllCustomersKatha,
@@ -25,10 +25,12 @@ import { StatusBar } from "expo-status-bar";
 import { useNavigation } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Customer } from "../useContext/context";
 
 export default function CustomerKathas({ route }) {
   const navigation = useNavigation();
   const { customerid, customername, phone } = route?.params;
+  const { addCustomerKatha } = useContext(Customer);
   const [customerKatha, setCustomerKatha] = useState({
     date: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
     products: "",
@@ -86,6 +88,7 @@ export default function CustomerKathas({ route }) {
     async function katha() {
       try {
         const res = await AllCustomersKatha(customerid, customername);
+        console.log("Customer Katha",res)
         setData(res.length > 0 ? res : []);
         let sum = 0;
         res.map((item, _) => {
@@ -97,7 +100,7 @@ export default function CustomerKathas({ route }) {
       }
     }
     katha();
-  }, [customerid, data.length]);
+  }, [customerid]);
 
   const handleDelete = async (id) => {
     try {
@@ -208,7 +211,7 @@ export default function CustomerKathas({ route }) {
         <Text className="text-white text-lg px-1 w-[35%]">Due</Text>
       </View>
       <View>
-        {data.map((item, index) => {
+        {data.length>0 && data.map((item, index) => {
           return (
             <TouchableOpacity
               className="bg-gray-200 mx-2 py-2 flex flex-row items-center "

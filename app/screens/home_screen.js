@@ -9,7 +9,7 @@ import {
   TextInput,
   Button,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import img from "../assests/profile.png";
@@ -37,7 +37,7 @@ import Animated, {
 
 export default function Home_screen({ route }) {
   const { title, subtitle, desc, message, id, phone } = route?.params || "";
-  const { totalCustomers } = CustomerContext(Customer);
+  const { data } = useContext(Customer);
   const navigation = useNavigation();
   const [totalCustomer, setTotal] = useState("");
   const [notes, setNotes] = useState([]);
@@ -51,7 +51,10 @@ export default function Home_screen({ route }) {
     shopname: "",
   });
   const [modalVisible, setModalVisible] = useState(false);
+
   useEffect(() => {
+    //  setMoreKatha(data);
+    // console.log("top data",data)
     async function fun() {
       try {
         const res = await SingleShopOwner(phone);
@@ -230,7 +233,7 @@ export default function Home_screen({ route }) {
                   <Text className="w-[35%] px-3 text-lg">
                     {" "}
                     {item.address.length > 10
-                      ? item.address.slice(0, 13) + "..."
+                      ? item.address.slice(0, 12) + ".."
                       : item.address}
                   </Text>
                 </TouchableOpacity>

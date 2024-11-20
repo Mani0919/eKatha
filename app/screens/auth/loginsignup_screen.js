@@ -83,8 +83,8 @@ export default function Loginsignup_screen() {
   });
   const login = useFormik({
     initialValues: {
-      phone: "",
-      password: "",
+      phone: "6303388146",
+      password: "Mani@123",
     },
     validationSchema: Login,
     onSubmit: () => {
