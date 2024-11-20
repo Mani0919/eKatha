@@ -22,10 +22,10 @@
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.manikanta_19.eKathaBook"
+      "package": "com.eashan20.eKathaBook"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.jpg"
     },
     "plugins": [
       [
@@ -37,7 +37,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "3a86de64-c496-4c03-b302-8b3bf2d6c433"
+        "projectId": "e2954b89-790f-4e69-a63c-bf0d8531e0b4"
       }
     }
   }

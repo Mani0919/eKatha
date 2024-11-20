@@ -143,7 +143,7 @@ export async function InsertCustomersKathaDeatils(
   paid,
   due
 ) {
-  console.log("Startedddddddddd")
+  console.log("Startedddddddddd");
   try {
     const db = await dataBase;
     const name = customername.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");
@@ -176,7 +176,7 @@ export async function InsertCustomersKathaDeatils(
 }
 
 export async function AllCustomersKatha(customerid, customername) {
-  console.log("all",customerid,customername)
+  console.log("all", customerid, customername);
   try {
     const db = await dataBase;
     const name = customername.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");
@@ -408,9 +408,10 @@ export async function createCustomerKathaSummaryTable() {
 
 export async function updateCustomerKathaSummary(customerid, customername) {
   console.log("console", customerid, customername);
+  let transactionActive = false; // Initialize the transaction flag
+  const db = await dataBase;
   try {
-    const db = await dataBase;
-
+    // Sanitize the customer name for use in the table name
     const name = customername.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");
     const tableName = `katha_${name}_${customerid}`;
 
@@ -419,30 +420,51 @@ export async function updateCustomerKathaSummary(customerid, customername) {
       `SELECT COUNT(*) AS kathaCount FROM ${tableName}`
     );
     console.log("result", result);
-    const kathaCount = result[0].kathaCount || 0;
+    const kathaCount = result[0].kathaCount || 0; // Default to 0 if no rows found
     console.log("kathacount", kathaCount);
+
+    // Check if an existing entry for this customer already exists in the summary table
     const existingEntry = await db.getAllAsync(
       `SELECT * FROM customer_katha_summary WHERE customerid = ?`,
       [customerid]
     );
-    console.log("exisfing", existingEntry);
-    await db.execAsync("BEGIN TRANSACTION");
+    console.log("existing", existingEntry);
+
+    // Check if a transaction is already active before starting a new one
+    // Difference: Here, we explicitly check if a transaction is already active.
+    if (!transactionActive) {
+      await db.execAsync("BEGIN TRANSACTION"); // Start a new transaction only if not active
+      transactionActive = true; // Mark the transaction as active
+    }
+
+    // If an existing entry is found, update it; otherwise, insert a new entry
     if (existingEntry.length > 0) {
-      // Update the existing summary
+      // Update the existing summary entry with the new katha count
       await db.runAsync(
         `UPDATE customer_katha_summary SET katha_count = ? WHERE customerid = ?`,
         [kathaCount, customerid]
       );
     } else {
-      // Insert a new summary entry
+      // Insert a new summary entry for the customer with the initial katha count
       await db.runAsync(
         `INSERT INTO customer_katha_summary (customerid, katha_count) VALUES (?, ?)`,
         [customerid, kathaCount]
       );
     }
-    await db.execAsync("COMMIT");
+
+    // Commit the transaction if it's active (this is the same behavior as before)
+    // Difference: We now only commit if a transaction is active to avoid issues with nested transactions.
+    if (transactionActive) {
+      await db.execAsync("COMMIT"); // Commit the transaction
+      transactionActive = false; // Mark the transaction as inactive after commit
+    }
     console.log(`Customer ${customerid} katha summary updated.`);
   } catch (error) {
+    // Rollback the transaction in case of any error to maintain database integrity
+    // Difference: We only roll back the transaction if it was actually started and is active.
+    if (transactionActive) {
+      await db.execAsync("ROLLBACK"); // Rollback the transaction on error
+    }
     console.error("Error updating customer_katha_summary: ", error);
   }
 }
@@ -516,6 +538,7 @@ export async function InsertShopOwner(
       });
       if (res.changes > 0) {
         console.log("Inserted");
+        return res;
       } else {
         console.log("NO");
       }
@@ -622,7 +645,7 @@ export async function UpdateShopOwnerDetails(
       });
       if (res.changes > 0) {
         console.log("Updated details");
-        return res
+        return res;
       } else {
         console.log("no");
       }

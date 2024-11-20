@@ -7,6 +7,7 @@ import {
   Alert,
   TouchableOpacity,
   Linking,
+  Image,
 } from "react-native";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,6 +27,7 @@ import { useNavigation } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Customer } from "../useContext/context";
+import noimg from "../assests/noimg.png";
 
 export default function CustomerKathas({ route }) {
   const navigation = useNavigation();
@@ -45,6 +47,7 @@ export default function CustomerKathas({ route }) {
   const [updateid, setUpdateid] = useState("");
   const [totaldue, setTotaldue] = useState(0);
   useEffect(() => {
+    console.log("sssssssssssssssssssss", customerid, customername);
     async function fun() {
       try {
         const res = CustomerKatha(customerid, customername);
@@ -74,9 +77,14 @@ export default function CustomerKathas({ route }) {
         customerKatha.paid,
         customerKatha.due
       );
+      console.log("id", customerid);
       const result = await updateCustomerKathaSummary(customerid, customername);
-
-      refRBSheet.current.close();
+      if (res) {
+        refRBSheet.current.close();
+      }
+      else{
+        Alert.alert("Something went wrong")
+      }
     } catch (error) {
       console.log("err", error);
     }
@@ -88,7 +96,7 @@ export default function CustomerKathas({ route }) {
     async function katha() {
       try {
         const res = await AllCustomersKatha(customerid, customername);
-        console.log("Customer Katha",res)
+        console.log("Customer Katha", res);
         setData(res.length > 0 ? res : []);
         let sum = 0;
         res.map((item, _) => {
@@ -199,65 +207,80 @@ export default function CustomerKathas({ route }) {
         </View>
       </View>
 
-      <View className="flex flex-row items-center gap-x-1 ml-2">
-        <Text className="text-[20px] font-bold">Total due amount to pay:</Text>
-        <Text className="text-[19px]">{totaldue}</Text>
-      </View>
-      <View className="bg-gray-500 mx-2 mt-5 flex flex-row items-center rounded">
-        <Text className="text-white text-lg px-2 w-[20%]">Date</Text>
-        <Text className="text-white text-lg px-3 w-[23%]"> Products</Text>
-        <Text className="text-white text-lg px-3 w-[23%]"> Amount</Text>
-        <Text className="text-white text-lg px-2 w-[20%]">Paid</Text>
-        <Text className="text-white text-lg px-1 w-[35%]">Due</Text>
-      </View>
-      <View>
-        {data.length>0 && data.map((item, index) => {
-          return (
-            <TouchableOpacity
-              className="bg-gray-200 mx-2 py-2 flex flex-row items-center "
-              key={index}
-              onPress={() => {
-                Alert.alert(
-                  "Katha Options",
-                  "If you want to update or delete the katha, long press on the date.",
-                  [
-                    {
-                      text: "Update",
-                      onPress: () => {
-                        setUpdateid(item.id);
-                        setUpdateStatus(true);
-                        console.log("Updating customer katha:", item);
-                        setCustomerKatha({
-                          date: item.date,
-                          products: item.totalproducts,
-                          totalamount: item.totalamount,
-                          paid: item.paid,
-                          due: item.due,
-                        });
-                        refRBSheet.current.open();
-                      },
-                    },
-                    {
-                      text: "Delete",
-                      onPress: () => handleDelete(item.id),
-                      style: "destructive",
-                    },
-                  ],
-                  { cancelable: true }
+      {data.length > 0 ? (
+        <View>
+          <View className="flex flex-row items-center gap-x-1 ml-2">
+            <Text className="text-[20px] font-bold">
+              Total due amount to pay:
+            </Text>
+            <Text className="text-[19px]">{totaldue}</Text>
+          </View>
+          <View className="bg-gray-500 mx-2 mt-5 flex flex-row items-center rounded">
+            <Text className="text-white text-lg px-2 w-[20%]">Date</Text>
+            <Text className="text-white text-lg px-3 w-[23%]"> Products</Text>
+            <Text className="text-white text-lg px-3 w-[23%]"> Amount</Text>
+            <Text className="text-white text-lg px-2 w-[20%]">Paid</Text>
+            <Text className="text-white text-lg px-1 w-[35%]">Due</Text>
+          </View>
+          <View>
+            {data.length > 0 &&
+              data.map((item, index) => {
+                return (
+                  <TouchableOpacity
+                    className="bg-gray-200 mx-2 py-2 flex flex-row items-center "
+                    key={index}
+                    onPress={() => {
+                      Alert.alert(
+                        "Katha Options",
+                        "If you want to update or delete the katha, long press on the date.",
+                        [
+                          {
+                            text: "Update",
+                            onPress: () => {
+                              setUpdateid(item.id);
+                              setUpdateStatus(true);
+                              console.log("Updating customer katha:", item);
+                              setCustomerKatha({
+                                date: item.date,
+                                products: item.totalproducts,
+                                totalamount: item.totalamount,
+                                paid: item.paid,
+                                due: item.due,
+                              });
+                              refRBSheet.current.open();
+                            },
+                          },
+                          {
+                            text: "Delete",
+                            onPress: () => handleDelete(item.id),
+                            style: "destructive",
+                          },
+                        ],
+                        { cancelable: true }
+                      );
+                    }}
+                  >
+                    <Text className=" text-lg px-3 w-[22%]">{item.date}</Text>
+                    <Text className=" text-lg px-3 w-[23%]">
+                      {item.totalproducts}
+                    </Text>
+                    <Text className=" text-lg px-3 w-[20%]">
+                      {item.totalamount}
+                    </Text>
+                    <Text className=" text-lg px-3 w-[20%]">{item.paid}</Text>
+                    <Text className=" text-lg px-3 w-[35%]">{item.due}</Text>
+                  </TouchableOpacity>
                 );
-              }}
-            >
-              <Text className=" text-lg px-3 w-[22%]">{item.date}</Text>
-              <Text className=" text-lg px-3 w-[23%]">
-                {item.totalproducts}
-              </Text>
-              <Text className=" text-lg px-3 w-[20%]">{item.totalamount}</Text>
-              <Text className=" text-lg px-3 w-[20%]">{item.paid}</Text>
-              <Text className=" text-lg px-3 w-[35%]">{item.due}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+              })}
+          </View>
+        </View>
+      ) : (
+        <View className="mx-auto p-10 flex flex-col items-center">
+          <Image source={noimg} className="w-44 h-44" />
+          <Text className="text-[20px] font-bold">No data</Text>
+        </View>
+      )}
+
       <RBSheet
         ref={refRBSheet}
         useNativeDriver={true}

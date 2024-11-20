@@ -17,6 +17,8 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import {
   CheckShopOwner,
+  createCustomerKathaSummaryTable,
+  createEntries,
   createShopOwners,
   InsertShopOwner,
 } from "../../dB/operations";
@@ -50,8 +52,24 @@ export default function Loginsignup_screen() {
       }
     }
     fun();
+    fun1();
+    fun2();
   }, []);
-
+  async function fun1() {
+    try {
+      await createEntries();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function fun2()
+  {
+    try {
+      await createCustomerKathaSummaryTable()
+    } catch (error) {
+      console.log(error)
+    }
+  }
   const profile = useFormik({
     initialValues: {
       name: "",
@@ -74,6 +92,11 @@ export default function Loginsignup_screen() {
             profile.values.address,
             profile.values.shopname
           );
+          if (res) {
+            Alert.alert("Registred");
+          } else {
+            Alert.alert("Something went wrong");
+          }
         } catch (error) {
           console.log(error);
         }
@@ -83,8 +106,8 @@ export default function Loginsignup_screen() {
   });
   const login = useFormik({
     initialValues: {
-      phone: "6303388146",
-      password: "Mani@123",
+      phone: "",
+      password: "",
     },
     validationSchema: Login,
     onSubmit: () => {

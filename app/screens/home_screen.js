@@ -28,7 +28,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import Entypo from "@expo/vector-icons/Entypo";
 import * as ImagePicker from "expo-image-picker";
-import RBSheet from "react-native-raw-bottom-sheet";
 import Animated, {
   SlideInDown,
   SlideInUp,
@@ -90,7 +89,8 @@ export default function Home_screen({ route }) {
     async function fun() {
       try {
         const res = await AllCustomers();
-        setTotal(res.length);
+        console.log("length", res);
+        setTotal(res.length > 0 ? res.length : "0");
       } catch (error) {}
     }
     fun();
@@ -194,7 +194,7 @@ export default function Home_screen({ route }) {
             <Text className="text-[16px]">{shopOwnerdetails.address}</Text>
           </View>
           <TouchableOpacity onPress={() => setVisible(true)}>
-            {image === "" ? (
+            {!image ? (
               <Image source={img} className="w-14 h-14" />
             ) : (
               <Image
@@ -333,7 +333,12 @@ export default function Home_screen({ route }) {
           <View style={styles.overlay}>
             <View style={styles.drawer}>
               <TouchableOpacity onPress={() => setVisible(false)}>
-                <Text style={styles.closeButton}>X</Text>
+                <Text
+                  style={styles.closeButton}
+                  className="bg-gray-400  rounded-full px-3 py-1"
+                >
+                  X
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.option} onPress={openCamera}>
                 <Text>Edit Profile Image</Text>
