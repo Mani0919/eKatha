@@ -25,15 +25,15 @@
 ## Installation & Setup 🚀
 
 1. Clone the repository:
-   ```bash
+
   git clone https://github.com/Mani0919/eKatha.git
 
-2. Navigate to the project directory:
+3. Navigate to the project directory:
    ```bash
    cd ekatha
-3. Install dependencies:
+4. Install dependencies:
    ```bash
    npm install
-4. Start the development server:
+5. Start the development server:
     ```bash
     npm start 
