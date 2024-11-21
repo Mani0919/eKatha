@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
   AllCustomersKatha,
   CustomerKatha,
+  DailySummary,
   DeleteCustomerKath,
   InsertCustomersKathaDeatils,
   updateCustomerKathaSummary,
@@ -53,20 +54,27 @@ export default function CustomerKathas({ route }) {
       } catch (error) {}
     }
     fun();
+    fun1();
   }, []);
-
+  async function fun1() {
+    try {
+      await DailySummary();
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const InsertCustomerKatha = async () => {
     try {
-      const newKatha = {
-        customerid,
-        customername,
-        date: customerKatha.date,
-        totalproducts: customerKatha.products,
-        totalamount: customerKatha.totalamount,
-        paid: customerKatha.paid,
-        due: customerKatha.due,
-      };
-      setData((prevData) => [...prevData, newKatha]);
+      // const newKatha = {
+      //   customerid,
+      //   customername,
+      //   date: customerKatha.date,
+      //   totalproducts: customerKatha.products,
+      //   totalamount: customerKatha.totalamount,
+      //   paid: customerKatha.paid,
+      //   due: customerKatha.due,
+      // };
+      // setData((prevData) => [...prevData, newKatha]);
       const res = await InsertCustomersKathaDeatils(
         customerid,
         customername,
@@ -77,12 +85,12 @@ export default function CustomerKathas({ route }) {
         customerKatha.due
       );
       console.log("id", customerid);
-      const result = await updateCustomerKathaSummary(customerid, customername);
+      const result = await updateCustomerKathaSummary(customerid, customername); //newly kept
       if (res) {
+        await AllCustomersKatha(customerid, customername);
         refRBSheet.current.close();
-      }
-      else{
-        Alert.alert("Something went wrong")
+      } else {
+        Alert.alert("Something went wrong");
       }
     } catch (error) {
       console.log("err", error);

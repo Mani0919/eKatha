@@ -20,6 +20,7 @@ import {
   AllCustomers,
   Allnotes,
   CreateNotes,
+  getAllTimeStatistics,
   getTopCustomersWithMoreKatha,
   SingleShopOwner,
   UpdateShopOwner,
@@ -51,6 +52,16 @@ export default function Home_screen({ route }) {
   });
   const [modalVisible, setModalVisible] = useState(false);
 
+  useEffect(() => {
+    async function fun() {
+      try {
+        const res = await getAllTimeStatistics();
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fun();
+  }, []);
   useEffect(() => {
     //  setMoreKatha(data);
     // console.log("top data",data)
@@ -178,7 +189,7 @@ export default function Home_screen({ route }) {
         shopOwnerdetails.id
       );
       if (res) {
-        refRBSheet.current.close();
+        setModalVisible(false);
       }
     } catch (error) {
       console.log(error);
@@ -285,7 +296,11 @@ export default function Home_screen({ route }) {
                   <Text className="text-[20px] text-gray-400">
                     {item.subtitle}
                   </Text>
-                  <Text className="w-52 h-32 ">{item.description}</Text>
+                  <Text className="w-52 h-32 ">
+                    {item.description.length > 100
+                      ? item.description.slice(0, 200) + "....more"
+                      : item.description}
+                  </Text>
                   <View className="flex flex-row justify-between items-center -mr-2">
                     <View className="flex flex-row items-center">
                       <Text className="text-lg">Created at:</Text>

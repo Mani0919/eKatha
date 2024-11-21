@@ -143,7 +143,6 @@ export async function InsertCustomersKathaDeatils(
   paid,
   due
 ) {
-  console.log("Startedddddddddd");
   try {
     const db = await dataBase;
     const name = customername.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");
@@ -160,6 +159,7 @@ export async function InsertCustomersKathaDeatils(
         $paid: paid,
         $due: due,
       });
+      
       if (res.changes > 0) {
         console.log("Inserted successfully. Rows affected:", res.changes);
         return true; // Indicates success
@@ -514,6 +514,7 @@ export async function createShopOwners() {
     console.error("Error creating entries: ", error);
   }
 }
+
 export async function InsertShopOwner(
   name,
   email,
@@ -654,5 +655,147 @@ export async function UpdateShopOwnerDetails(
     }
   } catch (error) {
     console.log(error);
+  }
+}
+
+//daily summary
+export async function DailySummary() {
+  try {
+    const db = await dataBase;
+    await db.execAsync(`
+      PRAGMA journal_mode = WAL;
+      PRAGMA foreign_keys = ON;
+      CREATE TABLE IF NOT EXISTS daily_summary (
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      date TEXT NOT NULL,
+      total_customers INTEGER NOT NULL,
+      total_products INTEGER NOT NULL,
+      total_amount REAL NOT NULL
+)
+    `);
+    console.log("daily summary table created")
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+
+//statics
+// Function to fetch all customer visits and total purchases for all dates
+export async function getAllTimeStatistics() {
+  try {
+    const db = await dataBase;
+    
+    // 1. Fetch all customers
+    const customers = await db.getAllAsync(`SELECT * FROM customers`);
+    
+    let totalAmount = 0;  // To hold the sum of all purchases
+    let totalVisits = 0;  // To hold the total number of customer visits
+    let dailyStats = {};  // Object to store daily statistics
+    
+    // 2. Loop through each customer
+    for (let customer of customers) {
+      const customerId = customer.id;
+      const customerName = customer.name.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");
+      
+      // 3. Query the katha table for this customer
+      const kathaTable = `katha_${customerName}_${customerId}`;
+      
+      // Fetch the total purchase amount and the number of visits for each date
+      const result = await db.getAllAsync(`
+        SELECT date, SUM(totalamount) AS totalAmount, COUNT(id) AS visitCount
+        FROM ${kathaTable}
+        GROUP BY date
+        ORDER BY date ASC
+      `);
+      
+      // Add the result to the overall totals and daily statistics
+      result.forEach(day => {
+        const date = day.date;
+        const amount = parseFloat(day.totalAmount || 0);
+        const visits = day.visitCount || 0;
+        
+        totalAmount += amount;  // Sum of all purchases
+        totalVisits += visits;  // Total number of visits
+
+        // Save the daily statistics
+        if (!dailyStats[date]) {
+          dailyStats[date] = { totalAmount: 0, totalVisits: 0 };
+        }
+        
+        dailyStats[date].totalAmount += amount;
+        dailyStats[date].totalVisits += visits;
+      });
+    }
+    
+    // 4. Return the total statistics and daily breakdown
+    console.log(`Total Visits: ${totalVisits}`);
+    console.log(`Total Amount Purchased: ${totalAmount.toFixed(2)}`);
+    console.log('Daily Stats:', dailyStats);
+    return { totalVisits, totalAmount: totalAmount.toFixed(2), dailyStats };
+    
+  } catch (error) {
+    console.error("Error fetching statistics:", error);
+  }
+}
+
+
+
+// Function to fetch customer data grouped by month (year-month format)
+export async function getMonthlyStatistics() {
+  try {
+    const db = await dataBase;
+    
+    // 1. Fetch all customers
+    const customers = await db.allAsync(`SELECT * FROM customers`);
+    
+    let totalAmount = 0;  // To hold the sum of all purchases
+    let totalVisits = 0;  // To hold the total number of customer visits
+    let monthlyStats = {};  // Object to store monthly statistics
+    
+    // 2. Loop through each customer
+    for (let customer of customers) {
+      const customerId = customer.id;
+      const customerName = customer.name.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");
+      
+      // 3. Query the katha table for this customer
+      const kathaTable = `katha_${customerName}_${customerId}`;
+      
+      // Fetch the total purchase amount and number of visits for each month
+      const result = await db.allAsync(`
+        SELECT strftime('%Y-%m', date) AS month, SUM(totalamount) AS totalAmount, COUNT(id) AS visitCount
+        FROM ${kathaTable}
+        GROUP BY month
+        ORDER BY month ASC
+      `);
+      
+      // Add the result to the overall totals and monthly statistics
+      result.forEach(month => {
+        const monthKey = month.month;  // In format "YYYY-MM"
+        const amount = parseFloat(month.totalAmount || 0);
+        const visits = month.visitCount || 0;
+        
+        totalAmount += amount;  // Sum of all purchases
+        totalVisits += visits;  // Total number of visits
+
+        // Save the monthly statistics
+        if (!monthlyStats[monthKey]) {
+          monthlyStats[monthKey] = { totalAmount: 0, totalVisits: 0 };
+        }
+        
+        monthlyStats[monthKey].totalAmount += amount;
+        monthlyStats[monthKey].totalVisits += visits;
+      });
+    }
+    
+    // 4. Return the total statistics and monthly breakdown
+    console.log(`Total Visits: ${totalVisits}`);
+    console.log(`Total Amount Purchased: ${totalAmount.toFixed(2)}`);
+    console.log('Monthly Stats:', monthlyStats);
+    return { totalVisits, totalAmount: totalAmount.toFixed(2), monthlyStats };
+    
+  } catch (error) {
+    console.error("Error fetching monthly statistics:", error);
   }
 }
