@@ -159,6 +159,15 @@ export default function CustomerKathas({ route }) {
       setUpdateStatus(false);
     }
   };
+
+  const getDate=(date)=>
+  {
+    const d = new Date(date);
+    const ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d);
+    const mo = new Intl.DateTimeFormat('en', { month: 'short' }).format(d);
+    const da = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(d);
+    return `${da}-${mo}-${ye}`;
+  }
   return (
     <SafeAreaView>
       {/* <StatusBar backgroundColor="black"  barStyle="light-content" /> */}
@@ -223,11 +232,11 @@ export default function CustomerKathas({ route }) {
             <Text className="text-[19px]">{totaldue}</Text>
           </View>
           <View className="bg-gray-500 mx-2 mt-5 flex flex-row items-center rounded">
-            <Text className="text-white text-lg px-2 w-[20%]">Date</Text>
-            <Text className="text-white text-lg px-3 w-[23%]"> Products</Text>
-            <Text className="text-white text-lg px-3 w-[23%]"> Amount</Text>
-            <Text className="text-white text-lg px-2 w-[20%]">Paid</Text>
-            <Text className="text-white text-lg px-1 w-[35%]">Due</Text>
+            <Text className="text-white text-md px-2 w-[20%]">Date</Text>
+            <Text className="text-white text-md px-3 w-[23%]"> Products</Text>
+            <Text className="text-white text-md px-3 w-[23%]"> Amount</Text>
+            <Text className="text-white text-md px-2 w-[20%]">Paid</Text>
+            <Text className="text-white text-md px-1 w-[35%]">Due</Text>
           </View>
           <View>
             {data.length > 0 &&
@@ -267,15 +276,15 @@ export default function CustomerKathas({ route }) {
                       );
                     }}
                   >
-                    <Text className=" text-lg px-3 w-[22%]">{item.date}</Text>
-                    <Text className=" text-lg px-3 w-[23%]">
+                    <Text className=" text-md px-3 w-[22%]">{item.date}</Text>
+                    <Text className=" text-md px-3 w-[23%]">
                       {item.totalproducts}
                     </Text>
-                    <Text className=" text-lg px-3 w-[20%]">
+                    <Text className=" text-md px-3 w-[20%]">
                       {item.totalamount}
                     </Text>
-                    <Text className=" text-lg px-3 w-[20%]">{item.paid}</Text>
-                    <Text className=" text-lg px-3 w-[35%]">{item.due}</Text>
+                    <Text className=" text-md px-3 w-[20%]">{item.paid}</Text>
+                    <Text className=" text-md px-3 w-[35%]">{item.due}</Text>
                   </TouchableOpacity>
                 );
               })}

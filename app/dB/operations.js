@@ -748,7 +748,7 @@ export async function getMonthlyStatistics() {
     const db = await dataBase;
     
     // 1. Fetch all customers
-    const customers = await db.allAsync(`SELECT * FROM customers`);
+    const customers = await db.getAllAsync(`SELECT * FROM customers`);
     
     let totalAmount = 0;  // To hold the sum of all purchases
     let totalVisits = 0;  // To hold the total number of customer visits
@@ -763,7 +763,7 @@ export async function getMonthlyStatistics() {
       const kathaTable = `katha_${customerName}_${customerId}`;
       
       // Fetch the total purchase amount and number of visits for each month
-      const result = await db.allAsync(`
+      const result = await db.getAllAsync(`
         SELECT strftime('%Y-%m', date) AS month, SUM(totalamount) AS totalAmount, COUNT(id) AS visitCount
         FROM ${kathaTable}
         GROUP BY month

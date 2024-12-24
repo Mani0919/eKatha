@@ -21,6 +21,7 @@ import {
   Allnotes,
   CreateNotes,
   getAllTimeStatistics,
+  getMonthlyStatistics,
   getTopCustomersWithMoreKatha,
   SingleShopOwner,
   UpdateShopOwner,
@@ -55,7 +56,7 @@ export default function Home_screen({ route }) {
   useEffect(() => {
     async function fun() {
       try {
-        const res = await getAllTimeStatistics();
+        const res = await getMonthlyStatistics();
       } catch (error) {
         console.log(error);
       }
