@@ -514,7 +514,16 @@ export async function createShopOwners() {
     console.error("Error creating entries: ", error);
   }
 }
-
+export async function AllShopOwners() {
+  try {
+    const db = await dataBase;
+    const res = await db.getAllAsync(`SELECT * FROM shopowners`);
+    console.log("all cutomers",res);
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+}
 export async function InsertShopOwner(
   name,
   email,

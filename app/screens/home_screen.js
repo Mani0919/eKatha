@@ -223,10 +223,10 @@ export default function Home_screen({ route }) {
 
         {/* Stats Card */}
         <View style={styles.statsCard}>
-          <View style={styles.stat}>
+          <TouchableOpacity style={styles.stat} onPress={() => navigation.navigate("Customers")}>
             <Text style={styles.statNumber}>{totalCustomer}</Text>
             <Text style={styles.statLabel}>Total Customers</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.statDivider} />
           <View style={styles.stat}>
             <Text style={styles.statNumber}>{notes.length}</Text>

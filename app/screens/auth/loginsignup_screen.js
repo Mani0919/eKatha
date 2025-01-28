@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useNavigation } from "@react-navigation/native";
 import {
+  AllShopOwners,
   CheckShopOwner,
   createCustomerKathaSummaryTable,
   createEntries,
@@ -28,13 +29,14 @@ import { Formik, useFormik } from "formik";
 import { Login, SignUp } from "../../Validations/sigup_validation";
 import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import Toast from "react-native-toast-message";
 export default function Loginsignup_screen() {
   const fadeAnim = new Animated.Value(0);
   const slideAnim = new Animated.Value(100);
   const { height } = Dimensions.get("window");
   const [toggle, setToggle] = useState(true);
   const navigation = useNavigation();
-
+  const [shopOwners, setShopOwners] = useState([]);
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -69,6 +71,8 @@ export default function Loginsignup_screen() {
     async function fun() {
       try {
         await createShopOwners();
+        const res = await AllShopOwners();
+        setShopOwners(res);
       } catch (error) {
         console.log("database error");
       }
@@ -105,24 +109,42 @@ export default function Loginsignup_screen() {
     onSubmit: () => {
       console.log(profile.values);
       const handleRegister = async () => {
-        try {
-          const res = await InsertShopOwner(
-            profile.values.name,
-            profile.values.email,
-            profile.values.phone,
-            profile.values.password,
-            profile.values.address,
-            profile.values.shopname
-          );
-          if (res) {
-            Alert.alert("Registred");
-            setToggle(true);
-            profile.resetForm();
-          } else {
-            Alert.alert("Phone number already exist");
+        const res = shopOwners.find(
+          (item) => item.phone === profile.values.phone
+        );
+        if (res) {
+          Toast.show({
+            type: 'info',
+            text1: 'Phone number already exist',
+            text2: 'Please try with another phone number',
+            position: 'top',
+          });
+        } else {
+          try {
+            const res = await InsertShopOwner(
+              profile.values.name,
+              profile.values.email,
+              profile.values.phone,
+              profile.values.password,
+              profile.values.address,
+              profile.values.shopname
+            );
+            if (res) {
+              Toast.show({
+                type: 'success',
+                text1: 'Account Created!',
+                text2: 'You have successfully registered 🎉',
+                position: 'top',
+                visibilityTime: 3000,
+              });
+              setToggle(true);
+              profile.resetForm();
+            } else {
+              Alert.alert("Phone number already exist");
+            }
+          } catch (error) {
+            console.log(error);
           }
-        } catch (error) {
-          console.log(error);
         }
       };
       handleRegister();
@@ -146,7 +168,12 @@ export default function Loginsignup_screen() {
               phone: login.values.phone,
             });
           } else {
-            Alert.alert("Invalid user");
+            Toast.show({
+              type: 'error',
+              text1: 'Invalid Credentials',
+              text2: 'Please check your phone number and password',
+              position: 'top',
+            });
           }
         } catch (error) {
           console.log(error);
@@ -231,39 +258,38 @@ export default function Loginsignup_screen() {
           className="flex-1"
           keyboardVerticalOffset={Platform.OS === "ios" ? -64 : 0}
         >
-        
-            {/* Auth Toggle */}
-            <View className="flex-row justify-center items-center my-6">
-              <TouchableOpacity
-                onPress={() => setToggle(false)}
-                className={`px-6 py-2 rounded-l-full ${
-                  !toggle ? "bg-blue-500" : "bg-gray-100"
+          {/* Auth Toggle */}
+          <View className="flex-row justify-center items-center my-6">
+            <TouchableOpacity
+              onPress={() => setToggle(false)}
+              className={`px-6 py-2 rounded-l-full ${
+                !toggle ? "bg-blue-500" : "bg-gray-100"
+              }`}
+            >
+              <Text
+                className={`text-[16px] font-semibold ${
+                  !toggle ? "text-white" : "text-gray-600"
                 }`}
               >
-                <Text
-                  className={`text-[16px] font-semibold ${
-                    !toggle ? "text-white" : "text-gray-600"
-                  }`}
-                >
-                  Sign Up
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setToggle(true)}
-                className={`px-6 py-2 rounded-r-full ${
-                  toggle ? "bg-blue-500" : "bg-gray-100"
+                Sign Up
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setToggle(true)}
+              className={`px-6 py-2 rounded-r-full ${
+                toggle ? "bg-blue-500" : "bg-gray-100"
+              }`}
+            >
+              <Text
+                className={`text-[16px] font-semibold ${
+                  toggle ? "text-white" : "text-gray-600"
                 }`}
               >
-                <Text
-                  className={`text-[16px] font-semibold ${
-                    toggle ? "text-white" : "text-gray-600"
-                  }`}
-                >
-                  Login
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView
+                Login
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView
             className="flex-1"
             showsVerticalScrollIndicator={false}
             bounces={false}

@@ -9,6 +9,7 @@ import Notes_screen from "./app/screens/notes_screen";
 import Singlenotes_screen from "./app/screens/singlenotes_screen";
 import Loginsignup_screen from "./app/screens/auth/loginsignup_screen";
 import CustomerContext from "./app/useContext/context";
+import Toast from "react-native-toast-message";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -60,6 +61,7 @@ export default function App() {
             }}
           />
         </Stack.Navigator>
+        <Toast />
       </NavigationContainer>
     </CustomerContext>
   );
