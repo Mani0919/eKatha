@@ -808,3 +808,32 @@ export async function getMonthlyStatistics() {
     console.error("Error fetching monthly statistics:", error);
   }
 }
+
+
+
+
+export async function ForgotPassword(phone, password) {
+  try {
+    const db = await dataBase;
+    const st = await db.prepareAsync(
+      `UPDATE shopowners SET password=$password WHERE phone=$phone`
+    );
+    try {
+      const res = await st.executeAsync({
+        $password: password,
+        $phone: phone,
+      });
+      if (res.changes > 0) {
+        console.log("password updated");
+        return res;
+      } else {
+        console.log("no");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  
+}

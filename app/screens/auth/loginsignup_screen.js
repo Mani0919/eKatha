@@ -30,6 +30,7 @@ import { Login, SignUp } from "../../Validations/sigup_validation";
 import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Toast from "react-native-toast-message";
+import ForgotPasswordModal from "../../ui/forgot";
 export default function Loginsignup_screen() {
   const fadeAnim = new Animated.Value(0);
   const slideAnim = new Animated.Value(100);
@@ -114,10 +115,10 @@ export default function Loginsignup_screen() {
         );
         if (res) {
           Toast.show({
-            type: 'info',
-            text1: 'Phone number already exist',
-            text2: 'Please try with another phone number',
-            position: 'top',
+            type: "info",
+            text1: "Phone number already exist",
+            text2: "Please try with another phone number",
+            position: "top",
           });
         } else {
           try {
@@ -131,10 +132,10 @@ export default function Loginsignup_screen() {
             );
             if (res) {
               Toast.show({
-                type: 'success',
-                text1: 'Account Created!',
-                text2: 'You have successfully registered 🎉',
-                position: 'top',
+                type: "success",
+                text1: "Account Created!",
+                text2: "You have successfully registered 🎉",
+                position: "top",
                 visibilityTime: 3000,
               });
               setToggle(true);
@@ -169,10 +170,10 @@ export default function Loginsignup_screen() {
             });
           } else {
             Toast.show({
-              type: 'error',
-              text1: 'Invalid Credentials',
-              text2: 'Please check your phone number and password',
-              position: 'top',
+              type: "error",
+              text1: "Invalid Credentials",
+              text2: "Please check your phone number and password",
+              position: "top",
             });
           }
         } catch (error) {
@@ -226,7 +227,7 @@ export default function Loginsignup_screen() {
       )}
     </View>
   );
-
+  const [isForgotPasswordVisible, setIsForgotPasswordVisible] = useState(false);
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar backgroundColor="#1e40af" barStyle="light-content" />
@@ -359,7 +360,10 @@ export default function Loginsignup_screen() {
 
               {/* Additional Options */}
               {toggle && (
-                <TouchableOpacity className="mt-4">
+                <TouchableOpacity
+                  className="mt-4"
+                  onPress={() => setIsForgotPasswordVisible(true)}
+                >
                   <Text className="text-blue-500 text-center">
                     Forgot Password?
                   </Text>
@@ -367,6 +371,10 @@ export default function Loginsignup_screen() {
               )}
             </View>
           </ScrollView>
+          <ForgotPasswordModal
+            visible={isForgotPasswordVisible}
+            onClose={() => setIsForgotPasswordVisible(false)}
+          />
         </KeyboardAvoidingView>
       </Animated.View>
     </SafeAreaView>
