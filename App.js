@@ -33,6 +33,9 @@ export default function App() {
           <Stack.Screen
             name="Customers"
             component={Customers_screen}
+            options={{
+              headerShown: false,
+            }}
             // options={{
             //   headerSearchBarOptions: {
             //     placeholder: "Search katha",
@@ -52,6 +55,7 @@ export default function App() {
             name="Single_notes"
             component={Singlenotes_screen}
             options={{
+              headerShown: false,
               title: "Notes Details",
             }}
           />

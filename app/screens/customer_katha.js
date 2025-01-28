@@ -169,321 +169,264 @@ export default function CustomerKathas({ route }) {
     return `${da}-${mo}-${ye}`;
   }
   return (
-    <SafeAreaView>
-      {/* <StatusBar backgroundColor="black"  barStyle="light-content" /> */}
-      <View
-        style={{
-          backgroundColor: "white",
-          borderColor: "#D3D3D3", // light gray border
-          padding: 16,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: 0,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          elevation: 4,
-        }}
-      >
-        <View className="flex flex-row items-center gap-x-1">
-          <AntDesign
-            name="arrowleft"
-            size={24}
-            color="black"
-            onPress={() => navigation.goBack()}
-          />
-          <Text className="text-xl">Customer Katha</Text>
-        </View>
-        <Ionicons
-          name="share-social-outline"
-          size={24}
-          color="black"
-          onPress={() => share.current.open()}
-        />
-      </View>
-      <View>
-        <View className="flex flex-row justify-end p-2">
-          <Button
-            title="Add katha"
-            onPress={() => {
-              setCustomerKatha({
-                date: new Date()
-                  .toLocaleDateString("en-GB")
-                  .replace(/\//g, "-"),
-                products: "",
-                totalamount: "",
-                paid: "",
-                due: "",
-              });
-              refRBSheet.current.open();
-            }}
-          />
-        </View>
-      </View>
+<SafeAreaView className="flex-1 bg-gray-50">
+ {/* Header */}
+ <View className="bg-white px-4 py-3 flex-row justify-between items-center shadow-md">
+   <View className="flex-row items-center space-x-3">
+     <AntDesign name="arrowleft" size={24} className="text-gray-800" onPress={() => navigation.goBack()} />
+     <Text className="text-xl font-semibold text-gray-800">Customer Katha</Text>
+   </View>
+   <TouchableOpacity onPress={() => share.current.open()}>
+     <Ionicons name="share-social-outline" size={24} className="text-gray-800" />
+   </TouchableOpacity>
+ </View>
 
-      {data.length > 0 ? (
-        <View>
-          <View className="flex flex-row items-center gap-x-1 ml-2">
-            <Text className="text-[20px] font-bold">
-              Total due amount to pay:
-            </Text>
-            <Text className="text-[19px]">{totaldue}</Text>
-          </View>
-          <View className="bg-gray-500 mx-2 mt-5 flex flex-row items-center rounded">
-            <Text className="text-white text-md px-2 w-[20%]">Date</Text>
-            <Text className="text-white text-md px-3 w-[23%]"> Products</Text>
-            <Text className="text-white text-md px-3 w-[23%]"> Amount</Text>
-            <Text className="text-white text-md px-2 w-[20%]">Paid</Text>
-            <Text className="text-white text-md px-1 w-[35%]">Due</Text>
-          </View>
-          <View>
-            {data.length > 0 &&
-              data.map((item, index) => {
-                return (
-                  <TouchableOpacity
-                    className="bg-gray-200 mx-2 py-2 flex flex-row items-center "
-                    key={index}
-                    onPress={() => {
-                      Alert.alert(
-                        "Katha Options",
-                        "If you want to update or delete the katha, long press on the date.",
-                        [
-                          {
-                            text: "Update",
-                            onPress: () => {
-                              setUpdateid(item.id);
-                              setUpdateStatus(true);
-                              console.log("Updating customer katha:", item);
-                              setCustomerKatha({
-                                date: item.date,
-                                products: item.totalproducts,
-                                totalamount: item.totalamount,
-                                paid: item.paid,
-                                due: item.due,
-                              });
-                              refRBSheet.current.open();
-                            },
-                          },
-                          {
-                            text: "Delete",
-                            onPress: () => handleDelete(item.id),
-                            style: "destructive",
-                          },
-                        ],
-                        { cancelable: true }
-                      );
-                    }}
-                  >
-                    <Text className=" text-md px-3 w-[22%]">{item.date}</Text>
-                    <Text className=" text-md px-3 w-[23%]">
-                      {item.totalproducts}
-                    </Text>
-                    <Text className=" text-md px-3 w-[20%]">
-                      {item.totalamount}
-                    </Text>
-                    <Text className=" text-md px-3 w-[20%]">{item.paid}</Text>
-                    <Text className=" text-md px-3 w-[35%]">{item.due}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-          </View>
-        </View>
-      ) : (
-        <View className="mx-auto p-10 flex flex-col items-center">
-          <Image source={noimg} className="w-44 h-44" />
-          <Text className="text-[20px] font-bold">No data</Text>
-        </View>
-      )}
+ {/* Add Button */}
+ <View className="px-4 py-3">
+   <TouchableOpacity 
+     className="bg-blue-600 py-2.5 px-6 rounded-lg self-end flex-row items-center space-x-2"
+     onPress={() => {
+       setCustomerKatha({
+         date: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
+         products: "",
+         totalamount: "",
+         paid: "",
+         due: "",
+       });
+       refRBSheet.current.open();
+     }}
+   >
+     <MaterialIcons name="add" size={20} color="white" />
+     <Text className="text-white font-medium">Add Katha</Text>
+   </TouchableOpacity>
+ </View>
 
-      <RBSheet
-        ref={refRBSheet}
-        useNativeDriver={true}
-        customStyles={{
-          container: {
-            height: 420,
-            borderBottomLeftRadius: 20,
-            borderBottomRightRadius: 20,
-            position: "absolute",
-            top: 0,
-          },
-          // draggableIcon: {
-          //   backgroundColor: "#000",
-          // },
-        }}
-        // draggable={true}
-        customModalProps={{
-          animationType: "slide",
-          statusBarTranslucent: true,
-        }}
-        customAvoidingViewProps={{
-          enabled: false,
-        }}
-      >
-        <ScrollView className="mt-10">
-          <Text className="p-2 font-bold text-[20px] ml-6">
-            Add/Update Customer Katha
-          </Text>
-          <View className="border-[0.8px] border-gray-400 p-2 mx-10 rounded mb-3">
-            <TextInput
-              placeholder="Enter data"
-              value={customerKatha.date}
-              onChangeText={(text) => {
-                setCustomerKatha((prev) => {
-                  return {
-                    ...prev,
-                    date: text,
-                  };
-                });
-              }}
-            />
-          </View>
-          <View className="border-[0.8px] border-gray-400 p-2 mx-10 rounded mb-3">
-            <TextInput
-              placeholder="Enter total products "
-              keyboardType="numeric"
-              value={customerKatha.products}
-              onChangeText={(text) => {
-                setCustomerKatha((prev) => {
-                  return {
-                    ...prev,
-                    products: text,
-                  };
-                });
-              }}
-            />
-          </View>
-          <View className="border-[0.8px] border-gray-400 p-2 mx-10 rounded mb-3">
-            <TextInput
-              placeholder="Enter total amount "
-              keyboardType="numeric"
-              value={customerKatha.totalamount}
-              onChangeText={(text) => {
-                setCustomerKatha((prev) => {
-                  return {
-                    ...prev,
-                    totalamount: text,
-                  };
-                });
-              }}
-            />
-          </View>
-          <View className="border-[0.8px] border-gray-400 p-2 mx-10 rounded mb-3">
-            <TextInput
-              placeholder="paid amount"
-              keyboardType="numeric"
-              value={customerKatha.paid}
-              onChangeText={(text) => {
-                const totalAmount = parseFloat(customerKatha.totalamount) || 0;
-                const paidAmount = parseFloat(text) || 0;
+ {data.length > 0 ? (
+   <ScrollView className="flex-1">
+     {/* Due Amount Card */}
+     <View className="mx-4 mb-4 bg-white rounded-xl shadow-sm p-4">
+       <Text className="text-gray-600 text-base">Total Due Amount</Text>
+       <Text className="text-3xl font-bold text-gray-900 mt-1">₹{totaldue}</Text>
+     </View>
 
-                if (paidAmount <= totalAmount) {
-                  setCustomerKatha((prev) => ({
-                    ...prev,
-                    paid: text,
-                  }));
-                } else {
-                  alert("Paid amount cannot be greater than total amount");
-                }
-              }}
-            />
-          </View>
-          <View className="border-[0.8px] border-gray-400 p-2 mx-10 rounded mb-3">
-            <TextInput
-              placeholder="Due amount to pay"
-              keyboardType="numeric"
-              value={customerKatha.due}
-              onChangeText={(text) => {
-                const totalAmount = parseFloat(customerKatha.totalamount) || 0;
-                const dueAmount = parseFloat(text) || 0;
+     {/* Table */}
+     <View className="mx-4 bg-white rounded-xl shadow-sm overflow-hidden">
+       <View className="bg-gray-800 px-4 py-3 flex-row items-center">
+         <Text className="text-white font-medium w-[20%]">Date</Text>
+         <Text className="text-white font-medium w-[23%]">Products</Text>
+         <Text className="text-white font-medium w-[23%]">Amount</Text>
+         <Text className="text-white font-medium w-[17%]">Paid</Text>
+         <Text className="text-white font-medium flex-1">Due</Text>
+       </View>
 
-                if (dueAmount <= totalAmount) {
-                  setCustomerKatha((prev) => ({
-                    ...prev,
-                    due: text,
-                  }));
-                } else {
-                  alert("Due amount cannot be greater than total amount");
-                }
-              }}
-            />
-          </View>
-          <View className="mx-20 rounded-2xl">
-            <Button
-              title="Submit"
-              onPress={() => {
-                if (!updateStatus) {
-                  InsertCustomerKatha();
-                } else {
-                  UpdateCustomerKatha();
-                }
-              }}
-            />
-          </View>
-        </ScrollView>
-      </RBSheet>
+       {data.map((item, index) => (
+         <TouchableOpacity
+           key={index}
+           className={`px-4 py-3.5 flex-row items-center border-b border-gray-100 ${
+             index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+           }`}
+           onPress={() => {
+             Alert.alert(
+               "Manage Entry",
+               "Choose an action",
+               [
+                 {
+                   text: "Update",
+                   onPress: () => {
+                     setUpdateid(item.id);
+                     setUpdateStatus(true);
+                     setCustomerKatha({
+                       date: item.date,
+                       products: item.totalproducts,
+                       totalamount: item.totalamount,
+                       paid: item.paid,
+                       due: item.due,
+                     });
+                     refRBSheet.current.open();
+                   },
+                 },
+                 {
+                   text: "Delete",
+                   style: "destructive",
+                   onPress: () => handleDelete(item.id),
+                 },
+                 { text: "Cancel", style: "cancel" },
+               ]
+             );
+           }}
+         >
+           <Text className="text-gray-800 w-[20%]">{item.date}</Text>
+           <Text className="text-gray-800 w-[23%]">{item.totalproducts}</Text>
+           <Text className="text-gray-800 w-[23%]">₹{item.totalamount}</Text>
+           <Text className="text-green-600 font-medium w-[17%]">₹{item.paid}</Text>
+           <Text className="text-red-600 font-medium flex-1">₹{item.due}</Text>
+         </TouchableOpacity>
+       ))}
+     </View>
+   </ScrollView>
+ ) : (
+   <View className="flex-1 justify-center items-center p-8">
+     <Image source={noimg} className="w-48 h-48 opacity-75" />
+     <Text className="text-xl font-semibold text-gray-800 mt-6">No Entries Yet</Text>
+     <Text className="text-gray-500 text-center mt-2">Start by adding your first katha entry</Text>
+   </View>
+ )}
 
-      <RBSheet
-        ref={share}
-        useNativeDriver={true}
-        customStyles={{
-          container: {
-            height: 200,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-          },
-          draggableIcon: {
-            backgroundColor: "#000",
-          },
-        }}
-        draggable={true}
-        customModalProps={{
-          animationType: "slide",
-          statusBarTranslucent: true,
-        }}
-        customAvoidingViewProps={{
-          enabled: false,
-        }}
-      >
-        <View className="mt-1">
-          <Text className="p-2 font-bold text-[20px] ml-6">
-            Share katha with
-          </Text>
-        </View>
-        <View className="flex flex-row items-center gap-x-5 justify-start px-5 mt-3">
-          <TouchableOpacity
-            className="bg-green-500 p-2 px-3 rounded-full"
-            onPress={() => {
-              const phoneNumber = `${phone}`;
-              const message = `Hi,${customername} due amount to pay ${totaldue} `;
-              const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
-                message
-              )}`;
-              Linking.openURL(url).catch(() => {
-                alert("WhatsApp is not installed on your device");
-              });
-            }}
-          >
-            <FontAwesome name="whatsapp" size={44} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="bg-gray-200 p-2  px-3  py-3 rounded-full"
-            onPress={() => {
-              const phoneNumber = `${phone}`;
-              const message = `Hi,${customername} due amount to pay ${totaldue} `;
-              const url = `sms:${phoneNumber}?body=${encodeURIComponent(
-                message
-              )}`;
-              Linking.openURL(url).catch(() => {
-                alert("WhatsApp is not installed on your device");
-              });
-            }}
-          >
-            <MaterialIcons name="textsms" size={38} color="black" />
-          </TouchableOpacity>
-        </View>
-      </RBSheet>
-    </SafeAreaView>
+ {/* Add/Edit Sheet */}
+ <RBSheet
+ ref={refRBSheet}
+ height={520}
+ openDuration={250}
+ customStyles={{
+   container: {
+     borderTopLeftRadius: 20,
+     borderTopRightRadius: 20,
+   }
+ }}
+>
+ <View className="flex-1 bg-white px-6 pt-6">
+   <Text className="text-2xl font-bold text-gray-800 mb-6">
+     {updateStatus ? "Update Entry" : "Add New Entry"}
+   </Text>
+   
+   <ScrollView className="flex-1 -mx-2">
+     <View className="mb-4">
+       <Text className="text-sm font-medium text-gray-700 mb-1">Entry Date</Text>
+       <TextInput
+         className="bg-gray-50 rounded-lg px-4 py-3 text-gray-800"
+         placeholder="DD-MM-YYYY"
+         value={customerKatha.date}
+         onChangeText={text => setCustomerKatha(prev => ({...prev, date: text}))}
+       />
+     </View>
+
+     <View className="mb-4">
+       <Text className="text-sm font-medium text-gray-700 mb-1">Number of Products</Text>
+       <TextInput
+         className="bg-gray-50 rounded-lg px-4 py-3 text-gray-800"
+         placeholder="Enter total products"
+         keyboardType="numeric"
+         value={customerKatha.products}
+         onChangeText={text => setCustomerKatha(prev => ({...prev, products: text}))}
+       />
+     </View>
+
+     <View className="mb-4">
+       <Text className="text-sm font-medium text-gray-700 mb-1">Total Amount (₹)</Text>
+       <TextInput
+         className="bg-gray-50 rounded-lg px-4 py-3 text-gray-800"
+         placeholder="Enter total amount"
+         keyboardType="numeric"
+         value={customerKatha.totalamount}
+         onChangeText={text => setCustomerKatha(prev => ({...prev, totalamount: text}))}
+       />
+     </View>
+
+     <View className="mb-4">
+       <Text className="text-sm font-medium text-gray-700 mb-1">Amount Paid (₹)</Text>
+       <TextInput
+         className="bg-gray-50 rounded-lg px-4 py-3 text-gray-800"
+         placeholder="Enter paid amount" 
+         keyboardType="numeric"
+         value={customerKatha.paid}
+         onChangeText={text => {
+           const total = parseFloat(customerKatha.totalamount) || 0;
+           const paid = parseFloat(text) || 0;
+           if (paid <= total) {
+             setCustomerKatha(prev => ({...prev, paid: text}));
+           } else {
+             Alert.alert("Invalid Amount", "Paid amount cannot exceed total amount");
+           }
+         }}
+       />
+     </View>
+
+     <View className="mb-6">
+       <Text className="text-sm font-medium text-gray-700 mb-1">Due Amount (₹)</Text>
+       <TextInput
+         className="bg-gray-50 rounded-lg px-4 py-3 text-gray-800"
+         placeholder="Enter due amount"
+         keyboardType="numeric"
+         value={customerKatha.due}
+         onChangeText={text => {
+           const total = parseFloat(customerKatha.totalamount) || 0;
+           const due = parseFloat(text) || 0;
+           if (due <= total) {
+             setCustomerKatha(prev => ({...prev, due: text}));
+           } else {
+             Alert.alert("Invalid Amount", "Due amount cannot exceed total amount");
+           }
+         }}
+       />
+     </View>
+   </ScrollView>
+
+   <View className="flex-row space-x-4 mb-6">
+     <TouchableOpacity 
+       className="flex-1 py-3 rounded-lg bg-gray-100"
+       onPress={() => refRBSheet.current.close()}
+     >
+       <Text className="text-center text-gray-800 font-medium">Cancel</Text>
+     </TouchableOpacity>
+     
+     <TouchableOpacity
+       className="flex-1 py-3 rounded-lg bg-blue-600"
+       onPress={() => {
+         if (!updateStatus) {
+           InsertCustomerKatha();
+         } else {
+           UpdateCustomerKatha();
+         }
+       }}
+     >
+       <Text className="text-center text-white font-medium">
+         {updateStatus ? "Update" : "Save"}
+       </Text>
+     </TouchableOpacity>
+   </View>
+ </View>
+</RBSheet>
+
+ {/* Share Sheet */}
+ <RBSheet
+   ref={share}
+   height={200}
+   customStyles={{
+     container: {
+       borderTopLeftRadius: 20,
+       borderTopRightRadius: 20,
+     }
+   }}
+ >
+   <View className="p-6">
+     <Text className="text-xl font-bold text-gray-800 mb-6">Share Katha</Text>
+     <View className="flex-row space-x-6">
+       <TouchableOpacity
+         className="bg-green-500 p-4 rounded-full"
+         onPress={() => {
+           const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(
+             `Hi ${customername}, your due amount is ₹${totaldue}`
+           )}`;
+           Linking.openURL(url).catch(() => Alert.alert("Error", "WhatsApp not installed"));
+         }}
+       >
+         <FontAwesome name="whatsapp" size={32} color="white" />
+       </TouchableOpacity>
+
+       <TouchableOpacity
+         className="bg-blue-500 p-4 rounded-full"
+         onPress={() => {
+           const url = `sms:${phone}?body=${encodeURIComponent(
+             `Hi ${customername}, your due amount is ₹${totaldue}`
+           )}`;
+           Linking.openURL(url).catch(() => Alert.alert("Error", "Cannot send SMS"));
+         }}
+       >
+         <MaterialIcons name="textsms" size={32} color="white" />
+       </TouchableOpacity>
+     </View>
+   </View>
+ </RBSheet>
+</SafeAreaView>
   );
 }

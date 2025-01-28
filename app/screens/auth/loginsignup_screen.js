@@ -1,19 +1,21 @@
 import {
   View,
   Text,
-  Image,
-  Dimensions,
   TextInput,
-  StyleSheet,
-  Button,
+  TouchableOpacity,
+  Image,
   ScrollView,
+  Animated,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
   Alert,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import img from "../../assests/login.jpg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import {
   CheckShopOwner,
@@ -24,11 +26,31 @@ import {
 } from "../../dB/operations";
 import { Formik, useFormik } from "formik";
 import { Login, SignUp } from "../../Validations/sigup_validation";
-
+import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 export default function Loginsignup_screen() {
-  const { width } = Dimensions.get("window");
+  const fadeAnim = new Animated.Value(0);
+  const slideAnim = new Animated.Value(100);
+  const { height } = Dimensions.get("window");
   const [toggle, setToggle] = useState(true);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 20,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [toggle]);
+
   const [signUpdata, setSignupdata] = useState({
     name: "",
     email: "",
@@ -62,12 +84,11 @@ export default function Loginsignup_screen() {
       console.log(error);
     }
   }
-  async function fun2()
-  {
+  async function fun2() {
     try {
-      await createCustomerKathaSummaryTable()
+      await createCustomerKathaSummaryTable();
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
   const profile = useFormik({
@@ -82,6 +103,7 @@ export default function Loginsignup_screen() {
     initialValues: signUpdata,
     validationSchema: SignUp,
     onSubmit: () => {
+      console.log(profile.values);
       const handleRegister = async () => {
         try {
           const res = await InsertShopOwner(
@@ -94,9 +116,10 @@ export default function Loginsignup_screen() {
           );
           if (res) {
             Alert.alert("Registred");
-            setToggle(true)
+            setToggle(true);
+            profile.resetForm();
           } else {
-            Alert.alert("Something went wrong");
+            Alert.alert("Phone number already exist");
           }
         } catch (error) {
           console.log(error);
@@ -132,133 +155,194 @@ export default function Loginsignup_screen() {
       handleLogin();
     },
   });
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar backgroundColor="#c0d6ed" />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View>
-          <Image source={img} className="w-full h-96" />
-        </View>
 
-        {!toggle ? (
-          <View
-            className="bg-white p-2 -mt-20  w-full flex-1"
-            style={style.container}
-          >
-            <View className="flex flex-row justify-center items-center py-4">
-              <Text
-                className={`text-[23px] -mr-1 ${
-                  !toggle ? "text-blue-400" : ""
+  const renderInput = (
+    { placeholder, name, keyboardType, maxLength, secureTextEntry },
+    formik
+  ) => (
+    <View className="mb-4">
+      <View className="relative">
+        <View className="absolute top-[14px] left-4 z-10">
+          {name === "email" && (
+            <Feather name="mail" size={20} color="#6b7280" />
+          )}
+          {name === "password" && (
+            <Feather name="lock" size={20} color="#6b7280" />
+          )}
+          {name === "phone" && (
+            <Feather name="phone" size={20} color="#6b7280" />
+          )}
+          {name === "name" && <Feather name="user" size={20} color="#6b7280" />}
+          {name === "address" && (
+            <Feather name="map-pin" size={20} color="#6b7280" />
+          )}
+          {name === "shopname" && (
+            <Feather name="shopping-bag" size={20} color="#6b7280" />
+          )}
+        </View>
+        <TextInput
+          placeholder={placeholder}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
+          secureTextEntry={secureTextEntry}
+          value={formik.values[name]}
+          onChangeText={formik.handleChange(name)}
+          onBlur={formik.handleBlur(name)}
+          className="bg-gray-50/60 rounded-xl px-12 py-4 text-gray-700 text-[16px]"
+          placeholderTextColor="#9ca3af"
+        />
+      </View>
+      {formik.touched[name] && formik.errors[name] && (
+        <Text className="text-red-500 text-sm ml-4 mt-1">
+          {formik.errors[name]}
+        </Text>
+      )}
+    </View>
+  );
+
+  return (
+    <SafeAreaView className="flex-1 bg-white">
+      <StatusBar backgroundColor="#1e40af" barStyle="light-content" />
+
+      {/* Fixed Header Image */}
+      <View className="h-[35%]">
+        <Image source={img} className="absolute w-full h-full" />
+        <LinearGradient
+          colors={["rgba(30,64,175,0.4)", "rgba(30,64,175,0.8)"]}
+          className="absolute w-full h-full"
+        />
+      </View>
+
+      {/* Scrollable Content */}
+      <Animated.View
+        className="flex-1 bg-white rounded-t-3xl -mt-20"
+        style={{
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }],
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -3 },
+          shadowOpacity: 0.1,
+          shadowRadius: 12,
+          elevation: 5,
+        }}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          className="flex-1"
+          keyboardVerticalOffset={Platform.OS === "ios" ? -64 : 0}
+        >
+        
+            {/* Auth Toggle */}
+            <View className="flex-row justify-center items-center my-6">
+              <TouchableOpacity
+                onPress={() => setToggle(false)}
+                className={`px-6 py-2 rounded-l-full ${
+                  !toggle ? "bg-blue-500" : "bg-gray-100"
                 }`}
               >
-                SignIn
-              </Text>
-              <MaterialCommunityIcons
-                name="slash-forward"
-                size={24}
-                color="black"
-              />
-              <Text
-                className="text-[15px] -ml-1"
-                onPress={() => setToggle(!toggle)}
+                <Text
+                  className={`text-[16px] font-semibold ${
+                    !toggle ? "text-white" : "text-gray-600"
+                  }`}
+                >
+                  Sign Up
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setToggle(true)}
+                className={`px-6 py-2 rounded-r-full ${
+                  toggle ? "bg-blue-500" : "bg-gray-100"
+                }`}
               >
-                Login
-              </Text>
+                <Text
+                  className={`text-[16px] font-semibold ${
+                    toggle ? "text-white" : "text-gray-600"
+                  }`}
+                >
+                  Login
+                </Text>
+              </TouchableOpacity>
             </View>
-            {[
-              { placeholder: "Enter fullname", name: "name" },
-              {
-                placeholder: "Enter phonenumber",
-                name: "phone",
-                keyboardType: "numeric",
-                maxLength: 10,
-              },
-              { placeholder: "Enter email (optional)", name: "email" },
-              { placeholder: "Enter password", name: "password" },
-              { placeholder: "Enter address", name: "address" },
-              { placeholder: "Enter shopname", name: "shopname" },
-            ].map((field, index) => (
-              <View key={index}>
-                <View className="border-[0.7px] border-gray-300 p-2 mx-10 rounded mb-2">
-                  <TextInput
-                    placeholder={field.placeholder}
-                    keyboardType={field.keyboardType}
-                    maxLength={field.maxLength}
-                    value={profile.values[field.name]}
-                    onChangeText={profile.handleChange(field.name)}
-                    onBlur={profile.handleBlur(field.name)}
-                  />
-                </View>
-                {profile.touched[field.name] && profile.errors[field.name] ? (
-                  <Text className="text-red-500 mx-10">
-                    {profile.errors[field.name]}
-                  </Text>
-                ) : null}
-              </View>
-            ))}
-
-            <View className=" p-2 mx-10 rounded">
-              <Button title="Submit" onPress={profile.handleSubmit} />
-            </View>
-          </View>
-        ) : (
-          <View
-            className="bg-white p-2 -mt-20  w-full flex-1"
-            style={style.container}
+            <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            contentContainerStyle={{
+              paddingBottom: Platform.OS === "ios" ? 120 : 90,
+            }}
           >
-            <View className="flex flex-row justify-center items-center py-4">
-              <Text
-                className="text-[15px] -mr-1"
-                onPress={() => setToggle(!toggle)}
+            {/* Form Fields */}
+            <View className="px-6">
+              {!toggle ? (
+                // Sign Up Form
+                <>
+                  {[
+                    { placeholder: "Full Name", name: "name" },
+                    {
+                      placeholder: "Phone Number",
+                      name: "phone",
+                      keyboardType: "numeric",
+                      maxLength: 10,
+                    },
+                    {
+                      placeholder: "Email (optional)",
+                      name: "email",
+                      keyboardType: "email-address",
+                    },
+                    {
+                      placeholder: "Password",
+                      name: "password",
+                      secureTextEntry: true,
+                    },
+                    { placeholder: "Address", name: "address" },
+                    { placeholder: "Shop Name", name: "shopname" },
+                  ].map((field, index) => renderInput(field, profile))}
+                </>
+              ) : (
+                // Login Form
+                <>
+                  {renderInput(
+                    {
+                      placeholder: "Phone Number",
+                      name: "phone",
+                      keyboardType: "numeric",
+                      maxLength: 10,
+                    },
+                    login
+                  )}
+                  {renderInput(
+                    {
+                      placeholder: "Password",
+                      name: "password",
+                      secureTextEntry: true,
+                    },
+                    login
+                  )}
+                </>
+              )}
+
+              {/* Submit Button */}
+              <TouchableOpacity
+                onPress={toggle ? login.handleSubmit : profile.handleSubmit}
+                className="bg-blue-500 rounded-xl py-4 mt-4"
               >
-                SignIn
-              </Text>
-              <MaterialCommunityIcons
-                name="slash-forward"
-                size={24}
-                color="black"
-              />
-              <Text
-                className={`text-[23px] -ml-1 ${toggle ? "text-blue-400" : ""}`}
-              >
-                Login
-              </Text>
+                <Text className="text-white text-center font-bold text-lg">
+                  {toggle ? "Login" : "Create Account"}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Additional Options */}
+              {toggle && (
+                <TouchableOpacity className="mt-4">
+                  <Text className="text-blue-500 text-center">
+                    Forgot Password?
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
-            <View className="border-[0.7px] border-gray-300 p-2 mx-10 rounded mb-2">
-              <TextInput
-                placeholder="Enter phonenumber"
-                keyboardType="numeric"
-                maxLength={10}
-                value={login.values.phone}
-                onChangeText={login.handleChange("phone")}
-                onBlur={login.handleBlur("phone")}
-              />
-            </View>
-            {login.touched.phone && login.errors.phone ? (
-              <Text className="text-red-500 mx-10">{login.errors.phone}</Text>
-            ) : null}
-            {/* Password Input */}
-            <View className="border-[0.7px] border-gray-300 p-2 mx-10 rounded mb-2">
-              <TextInput
-                placeholder="Enter password"
-                value={login.values.password} // Formik-managed state
-                secureTextEntry // Hide password input
-                onChangeText={login.handleChange("password")} // Formik handler
-                onBlur={login.handleBlur("password")} // Mark as touched when blurred
-              />
-            </View>
-            {login.touched.password && login.errors.password ? (
-              <Text className="text-red-500 mx-10">
-                {login.errors.password}
-              </Text>
-            ) : null}
-            {/* Submit Button */}
-            <View className="p-2 mx-10 rounded">
-              <Button title="Submit" onPress={login.handleSubmit} />
-            </View>
-          </View>
-        )}
-      </ScrollView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
