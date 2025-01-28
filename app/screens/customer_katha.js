@@ -168,6 +168,7 @@ export default function CustomerKathas({ route }) {
     const da = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(d);
     return `${da}-${mo}-${ye}`;
   }
+
   return (
 <SafeAreaView className="flex-1 bg-gray-50">
  {/* Header */}
@@ -219,49 +220,62 @@ export default function CustomerKathas({ route }) {
          <Text className="text-white font-medium flex-1">Due</Text>
        </View>
 
-       {data.map((item, index) => (
-         <TouchableOpacity
-           key={index}
-           className={`px-4 py-3.5 flex-row items-center border-b border-gray-100 ${
-             index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-           }`}
-           onPress={() => {
-             Alert.alert(
-               "Manage Entry",
-               "Choose an action",
-               [
-                 {
-                   text: "Update",
-                   onPress: () => {
-                     setUpdateid(item.id);
-                     setUpdateStatus(true);
-                     setCustomerKatha({
-                       date: item.date,
-                       products: item.totalproducts,
-                       totalamount: item.totalamount,
-                       paid: item.paid,
-                       due: item.due,
-                     });
-                     refRBSheet.current.open();
-                   },
-                 },
-                 {
-                   text: "Delete",
-                   style: "destructive",
-                   onPress: () => handleDelete(item.id),
-                 },
-                 { text: "Cancel", style: "cancel" },
-               ]
-             );
-           }}
-         >
-           <Text className="text-gray-800 w-[20%]">{item.date}</Text>
-           <Text className="text-gray-800 w-[23%]">{item.totalproducts}</Text>
-           <Text className="text-gray-800 w-[23%]">₹{item.totalamount}</Text>
-           <Text className="text-green-600 font-medium w-[17%]">₹{item.paid}</Text>
-           <Text className="text-red-600 font-medium flex-1">₹{item.due}</Text>
-         </TouchableOpacity>
-       ))}
+       {data.map((item, index) => {
+  // Format the date using Intl.DateTimeFormat with a short month
+  const formattedDate = new Date(
+    item.date.split("-").reverse().join("-")
+  ).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short", // Use short for abbreviated month
+    day: "numeric",
+  });
+
+  return (
+    <TouchableOpacity
+      key={index}
+      className={`px-4 py-3.5 flex-row items-center border-b border-gray-100 ${
+        index % 2 === 0 ? "bg-gray-50" : "bg-white"
+      }`}
+      onPress={() => {
+        Alert.alert(
+          "Manage Entry",
+          "Choose an action",
+          [
+            {
+              text: "Update",
+              onPress: () => {
+                setUpdateid(item.id);
+                setUpdateStatus(true);
+                setCustomerKatha({
+                  date: item.date,
+                  products: item.totalproducts,
+                  totalamount: item.totalamount,
+                  paid: item.paid,
+                  due: item.due,
+                });
+                refRBSheet.current.open();
+              },
+            },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: () => handleDelete(item.id),
+            },
+            { text: "Cancel", style: "cancel" },
+          ]
+        );
+      }}
+    >
+      {/* Use the formatted date */}
+      <Text className="text-gray-800 w-[20%]">{formattedDate}</Text>
+      <Text className="text-gray-800 w-[23%]">{item.totalproducts}</Text>
+      <Text className="text-gray-800 w-[23%]">₹{item.totalamount}</Text>
+      <Text className="text-green-600 font-medium w-[17%]">₹{item.paid}</Text>
+      <Text className="text-red-600 font-medium flex-1">₹{item.due}</Text>
+    </TouchableOpacity>
+  );
+})}
+
      </View>
    </ScrollView>
  ) : (
