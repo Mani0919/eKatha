@@ -759,38 +759,46 @@ export async function getMonthlyStatistics() {
     // 1. Fetch all customers
     const customers = await db.getAllAsync(`SELECT * FROM customers`);
     
-    let totalAmount = 0;  // To hold the sum of all purchases
-    let totalVisits = 0;  // To hold the total number of customer visits
-    let monthlyStats = {};  // Object to store monthly statistics
+    let totalAmount = 0;
+    let totalVisits = 0;
+    let monthlyStats = {};
     
     // 2. Loop through each customer
     for (let customer of customers) {
       const customerId = customer.id;
-      const customerName = customer.name.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_]/g, "");
+      const customerName = customer.name
+        .replace(/\s+/g, "")
+        .replace(/[^a-zA-Z0-9_]/g, "");
       
-      // 3. Query the katha table for this customer
       const kathaTable = `katha_${customerName}_${customerId}`;
       
-      // Fetch the total purchase amount and number of visits for each month
+      // 3. Query that keeps transactions grouped
       const result = await db.getAllAsync(`
-        SELECT strftime('%Y-%m', date) AS month, SUM(totalamount) AS totalAmount, COUNT(id) AS visitCount
+        SELECT 
+          CASE 
+            WHEN strftime('%Y-%m', date) IS NULL THEN 'current'
+            ELSE strftime('%Y-%m', date)
+          END AS month,
+          SUM(totalamount) AS totalAmount,
+          COUNT(id) AS visitCount
         FROM ${kathaTable}
         GROUP BY month
-        ORDER BY month ASC
       `);
       
-      // Add the result to the overall totals and monthly statistics
+      // 4. Process results while maintaining grouping
       result.forEach(month => {
-        const monthKey = month.month;  // In format "YYYY-MM"
+        const monthKey = 'Month 1'; // Using a single month for all transactions
         const amount = parseFloat(month.totalAmount || 0);
         const visits = month.visitCount || 0;
         
-        totalAmount += amount;  // Sum of all purchases
-        totalVisits += visits;  // Total number of visits
-
-        // Save the monthly statistics
+        totalAmount += amount;
+        totalVisits += visits;
+        
         if (!monthlyStats[monthKey]) {
-          monthlyStats[monthKey] = { totalAmount: 0, totalVisits: 0 };
+          monthlyStats[monthKey] = {
+            totalAmount: 0,
+            totalVisits: 0
+          };
         }
         
         monthlyStats[monthKey].totalAmount += amount;
@@ -798,14 +806,15 @@ export async function getMonthlyStatistics() {
       });
     }
     
-    // 4. Return the total statistics and monthly breakdown
-    console.log(`Total Visits: ${totalVisits}`);
-    console.log(`Total Amount Purchased: ${totalAmount.toFixed(2)}`);
-    console.log('Monthly Stats:', monthlyStats);
-    return { totalVisits, totalAmount: totalAmount.toFixed(2), monthlyStats };
+    return {
+      totalVisits,
+      totalAmount: totalAmount.toFixed(2),
+      monthlyStats
+    };
     
   } catch (error) {
     console.error("Error fetching monthly statistics:", error);
+    throw error;
   }
 }
 

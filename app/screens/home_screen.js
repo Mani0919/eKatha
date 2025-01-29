@@ -10,7 +10,13 @@ import {
   Button,
   Pressable,
 } from "react-native";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import img from "../assests/profile.png";
@@ -28,7 +34,7 @@ import {
   UpdateShopOwner,
   UpdateShopOwnerDetails,
 } from "../dB/operations";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Entypo from "@expo/vector-icons/Entypo";
 import * as ImagePicker from "expo-image-picker";
 import Animated, {
@@ -38,6 +44,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import MonthlyStatsChart from "../ui/monthlyChart";
 
 export default function Home_screen({ route }) {
   const { title, subtitle, desc, message, id, phone } = route?.params || "";
@@ -57,22 +65,41 @@ export default function Home_screen({ route }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
-  useEffect(() => {
-    async function fun() {
-      try {
-        const res = await getMonthlyStatistics();
-      } catch (error) {
-        console.log(error);
+  const [monthly, setMonthly] = useState({
+    monthlyStats: {},
+    totalVisits: 0,
+    totalAmount: "0.00"
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  async function getMonthsData() {
+    try {
+      setIsLoading(true);
+      const res = await getMonthlyStatistics();
+      console.log("res monthly", res);
+      if (res) {
+        setMonthly(res);
       }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
-    fun();
-  }, []);
+  }
+  useFocusEffect(
+    useCallback(() => {
+      getMonthsData();
+      fun3()
+      fun1()
+      fun2()
+    }, [])
+  );
   useEffect(() => {
     //  setMoreKatha(data);
     // console.log("top data",data)
     async function fun() {
       try {
-        const res = await SingleShopOwner(phone);
+        const phonenum = await AsyncStorage.getItem("phone");
+        const res = await SingleShopOwner(phonenum);
         setShopownerDetails(res[0]);
         setImage(res[0].pic);
         setToupdateDetails({
@@ -150,6 +177,7 @@ export default function Home_screen({ route }) {
 
   const handleLogout = () => {
     navigation.navigate("auth");
+    AsyncStorage.removeItem("login");
   };
 
   useEffect(() => {
@@ -194,7 +222,7 @@ export default function Home_screen({ route }) {
         shopOwnerdetails.id
       );
       setIsProfileModalVisible(false);
-      console.log("res",res);
+      console.log("res", res);
       if (res) {
         setIsProfileModalVisible(false);
       }
@@ -209,7 +237,9 @@ export default function Home_screen({ route }) {
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.headerInfo}>
-            <Text style={styles.greeting}>Hi, {shopOwnerdetails?.fullname}</Text>
+            <Text style={styles.greeting}>
+              Hi, {shopOwnerdetails?.fullname}
+            </Text>
             <Text style={styles.shopName}>{shopOwnerdetails?.shopname}</Text>
             <Text style={styles.address}>{shopOwnerdetails?.address}</Text>
           </View>
@@ -223,7 +253,10 @@ export default function Home_screen({ route }) {
 
         {/* Stats Card */}
         <View style={styles.statsCard}>
-          <TouchableOpacity style={styles.stat} onPress={() => navigation.navigate("Customers")}>
+          <TouchableOpacity
+            style={styles.stat}
+            onPress={() => navigation.navigate("Customers")}
+          >
             <Text style={styles.statNumber}>{totalCustomer}</Text>
             <Text style={styles.statLabel}>Total Customers</Text>
           </TouchableOpacity>
@@ -345,7 +378,9 @@ export default function Home_screen({ route }) {
             <Text style={styles.emptyStateText}>No notes yet</Text>
           </View>
         )}
-
+        <View className="my-4">
+          {monthly && <MonthlyStatsChart data={monthly} />}
+        </View>
         <Modal
           transparent={true}
           visible={isMenuVisible}

@@ -84,10 +84,10 @@ export default function CustomerKathas({ route }) {
         customerKatha.paid,
         customerKatha.due
       );
-      console.log("id", customerid);
+      console.log("id", customerid,res);
       const result = await updateCustomerKathaSummary(customerid, customername); //newly kept
       if (res) {
-        await AllCustomersKatha(customerid, customername);
+        await katha();
         refRBSheet.current.close();
       } else {
         Alert.alert("Something went wrong");
@@ -100,22 +100,22 @@ export default function CustomerKathas({ route }) {
     // Alert.alert(
     //   "If you want to update/delete the katha, long press on the date "
     // );
-    async function katha() {
-      try {
-        const res = await AllCustomersKatha(customerid, customername);
-        console.log("Customer Katha", res);
-        setData(res.length > 0 ? res : []);
-        let sum = 0;
-        res.map((item, _) => {
-          sum = sum + parseInt(item.due);
-        });
-        setTotaldue(sum);
-      } catch (error) {
-        console.log(error);
-      }
-    }
     katha();
   }, [customerid]);
+  async function katha() {
+    try {
+      const res = await AllCustomersKatha(customerid, customername);
+      console.log("Customer Katha", res);
+      setData(res.length > 0 ? res : []);
+      let sum = 0;
+      res.map((item, _) => {
+        sum = sum + parseInt(item.due);
+      });
+      setTotaldue(sum);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleDelete = async (id) => {
     try {

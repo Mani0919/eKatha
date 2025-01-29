@@ -31,6 +31,7 @@ import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Toast from "react-native-toast-message";
 import ForgotPasswordModal from "../../ui/forgot";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function Loginsignup_screen() {
   const fadeAnim = new Animated.Value(0);
   const slideAnim = new Animated.Value(100);
@@ -74,6 +75,10 @@ export default function Loginsignup_screen() {
         await createShopOwners();
         const res = await AllShopOwners();
         setShopOwners(res);
+        const t=await AsyncStorage.getItem("login");
+        if(t!=null){
+          navigation.replace("Home");
+        }
       } catch (error) {
         console.log("database error");
       }
@@ -131,6 +136,7 @@ export default function Loginsignup_screen() {
               profile.values.shopname
             );
             if (res) {
+             
               Toast.show({
                 type: "success",
                 text1: "Account Created!",
@@ -165,6 +171,8 @@ export default function Loginsignup_screen() {
             login.values.password
           );
           if (res) {
+            await AsyncStorage.setItem("login","true");
+            await AsyncStorage.setItem("phone",login.values.phone);
             navigation.replace("Home", {
               phone: login.values.phone,
             });
