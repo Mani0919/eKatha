@@ -1,6 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import { Alert } from "react-native";
-
+import * as FileSystem from 'expo-file-system'
 const dataBase = SQLite.openDatabaseAsync("shop.db");
 
 export async function createEntries() {
@@ -845,4 +845,37 @@ export async function ForgotPassword(phone, password) {
     console.log(error);
   }
   
+}
+
+//delete account
+export async function DeleteAccount() {
+  try {
+    // First close any existing database connections
+    if (dataBase) {
+      // Close all open database connections
+      dataBase.closeAsync && dataBase._dataBase.close(); // Close the database if it's open
+    }
+
+    // Clear any stored data
+    await dataBase.clearAsync && dataBase.clearAsync();
+
+    // Get the database file path
+    const dbPath = `${FileSystem.documentDirectory}SQLite/shop.db`;
+    
+    // Check if file exists before attempting deletion
+    const { exists } = await FileSystem.getInfoAsync(dbPath);
+    if (exists) {
+      // Delete the actual database file
+      await FileSystem.deleteAsync(dbPath, { idempotent: true });
+    }
+
+    // Delete using SQLite method as well for completeness
+    await SQLite.deleteDatabaseAsync("shop.db");
+    
+    console.log("Database deleted successfully");
+    return true;
+  } catch (error) {
+    console.log("Error deleting database:", error);
+    return false;
+  }
 }

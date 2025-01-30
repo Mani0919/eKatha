@@ -9,6 +9,7 @@ import {
   TextInput,
   Button,
   Pressable,
+  Alert,
 } from "react-native";
 import React, {
   useCallback,
@@ -27,6 +28,7 @@ import {
   AllCustomers,
   Allnotes,
   CreateNotes,
+  DeleteAccount,
   getAllTimeStatistics,
   getMonthlyStatistics,
   getTopCustomersWithMoreKatha,
@@ -46,7 +48,7 @@ import { StatusBar } from "expo-status-bar";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MonthlyStatsChart from "../ui/monthlyChart";
-
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 export default function Home_screen({ route }) {
   const { title, subtitle, desc, message, id, phone } = route?.params || "";
   const { data } = useContext(Customer);
@@ -68,7 +70,7 @@ export default function Home_screen({ route }) {
   const [monthly, setMonthly] = useState({
     monthlyStats: {},
     totalVisits: 0,
-    totalAmount: "0.00"
+    totalAmount: "0.00",
   });
   const [isLoading, setIsLoading] = useState(false);
   async function getMonthsData() {
@@ -88,9 +90,9 @@ export default function Home_screen({ route }) {
   useFocusEffect(
     useCallback(() => {
       getMonthsData();
-      fun3()
-      fun1()
-      fun2()
+      fun3();
+      fun1();
+      fun2();
     }, [])
   );
   useEffect(() => {
@@ -228,6 +230,29 @@ export default function Home_screen({ route }) {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+  const handleDelete = async () => {
+    try {
+      const res = await DeleteAccount();
+      if (res) {
+        await AsyncStorage.removeItem("login");
+        navigation.navigate("auth");
+      } else {
+        // Handle deletion failure
+        Alert.alert(
+          "Error",
+          "Failed to delete account. Please try again.",
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      Alert.alert(
+        "Error",
+        "An unexpected error occurred.",
+        [{ text: "OK" }]
+      );
     }
   };
   return (
@@ -421,7 +446,19 @@ export default function Home_screen({ route }) {
                 <MaterialIcons name="edit" size={24} color="#007AFF" />
                 <Text style={styles.menuItemText}>Edit Profile Details</Text>
               </TouchableOpacity>
-
+              <TouchableOpacity
+                style={[styles.menuItem, styles.logoutButton]}
+                onPress={handleDelete}
+              >
+                <MaterialCommunityIcons
+                  name="account-cancel-outline"
+                  size={24}
+                  color="red"
+                />
+                <Text style={[styles.menuItemText, styles.logoutText]}>
+                  Delete Account
+                </Text>
+              </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.menuItem, styles.logoutButton]}
                 onPress={handleLogout}
