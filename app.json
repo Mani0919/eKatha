@@ -20,6 +20,7 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
+        "android.permission.RECORD_AUDIO",
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.eashan20.eKathaBook"
@@ -39,6 +40,12 @@
       "eas": {
         "projectId": "e2954b89-790f-4e69-a63c-bf0d8531e0b4"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e2954b89-790f-4e69-a63c-bf0d8531e0b4"
     }
   }
 }
