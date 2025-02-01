@@ -251,7 +251,7 @@ export default function Home_screen({ route }) {
     }
   };
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} className="">
       <StatusBar barStyle="dark-content" />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header Section */}
@@ -399,7 +399,7 @@ export default function Home_screen({ route }) {
           </View>
         )}
         <View className="my-4">
-          <MonthlyStatsChart data={monthly} />
+          {/* <MonthlyStatsChart data={monthly} /> */}
         </View>
         <Modal
           transparent={true}

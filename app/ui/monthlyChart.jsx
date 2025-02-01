@@ -140,7 +140,7 @@ const styles = {
   },
   scrollContainer: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    // backgroundColor: '#f8fafc',
   },
   container: {
     padding: 16,
