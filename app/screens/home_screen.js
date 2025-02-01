@@ -76,11 +76,11 @@ export default function Home_screen({ route }) {
   async function getMonthsData() {
     try {
       setIsLoading(true);
+      console.log("monly renve start")
       const res = await getMonthlyStatistics();
       console.log("res monthly", res);
-      if (res) {
-        setMonthly(res);
-      }
+
+      setMonthly(res);
     } catch (error) {
       console.log(error);
     } finally {
@@ -90,6 +90,7 @@ export default function Home_screen({ route }) {
   useFocusEffect(
     useCallback(() => {
       getMonthsData();
+      fun();
       fun3();
       fun1();
       fun2();
@@ -131,18 +132,18 @@ export default function Home_screen({ route }) {
     if (message && id) {
       setNotes((prev) => prev.filter((customer) => customer.id !== id));
     }
-    async function fun() {
-      try {
-        const res = await AllCustomers();
-        console.log("length", res);
-        setTotal(res.length > 0 ? res.length : "0");
-      } catch (error) {}
-    }
+
     fun();
     fun1();
     fun2();
     fun3();
   }, [title, subtitle, desc, message, id]);
+  async function fun() {
+    try {
+      const res = await AllCustomers();
+      setTotal(res.length > 0 ? res.length : "0");
+    } catch (error) {}
+  }
   async function fun1() {
     try {
       const res = await CreateNotes();
@@ -240,23 +241,17 @@ export default function Home_screen({ route }) {
         navigation.navigate("auth");
       } else {
         // Handle deletion failure
-        Alert.alert(
-          "Error",
-          "Failed to delete account. Please try again.",
-          [{ text: "OK" }]
-        );
+        Alert.alert("Error", "Failed to delete account. Please try again.", [
+          { text: "OK" },
+        ]);
       }
     } catch (error) {
       console.log(error);
-      Alert.alert(
-        "Error",
-        "An unexpected error occurred.",
-        [{ text: "OK" }]
-      );
+      Alert.alert("Error", "An unexpected error occurred.", [{ text: "OK" }]);
     }
   };
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} className="">
       <StatusBar barStyle="dark-content" />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header Section */}
@@ -404,7 +399,7 @@ export default function Home_screen({ route }) {
           </View>
         )}
         <View className="my-4">
-          {monthly && <MonthlyStatsChart data={monthly} />}
+          {/* <MonthlyStatsChart data={monthly} /> */}
         </View>
         <Modal
           transparent={true}

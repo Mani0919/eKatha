@@ -123,6 +123,7 @@ export default function Customers_screen() {
     try {
       setData((prev) => prev.filter((customer) => customer.id !== id));
       const res = await DeleteCustomer(id);
+      console.log("del",res)
     } catch (error) {
       console.log(error);
     }

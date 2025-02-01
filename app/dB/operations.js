@@ -97,8 +97,10 @@ export async function DeleteCustomer(id) {
       });
       if (res.changes > 0) {
         console.log("Customer deleted successfully");
+        return true
       } else {
         console.log("No rows matched for deletion");
+        return false
       }
     } catch (error) {
       console.log(error);
@@ -265,7 +267,6 @@ export async function CreateNotes() {
       CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT  NOT NULL , title TEXT NOT NULL, subtitle TEXT NOT NULL, description TEXT NOT NULL, createddate TEXT )`);
     const columns = await db.getAllAsync(`PRAGMA table_info(notes);`);
     const columnNames = columns.map((col) => col.name);
-    console.log("Existing columns:", columnNames);
     if (!columnNames.includes("createddate")) {
       await db.execAsync(`ALTER TABLE notes ADD COLUMN createddate TEXT;`);
       console.log("Added missing 'createddate' column");
