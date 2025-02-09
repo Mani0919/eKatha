@@ -10,6 +10,7 @@ import {
   Button,
   Pressable,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import React, {
   useCallback,
@@ -73,16 +74,30 @@ export default function Home_screen({ route }) {
     totalAmount: "0.00",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   async function getMonthsData() {
     try {
       setIsLoading(true);
-      console.log("monly renve start")
+      setError(null);
+      console.log("monthly revenue start");
       const res = await getMonthlyStatistics();
       console.log("res monthly", res);
-
+      
+      // Validate the response
+      if (!res || !res.monthlyStats) {
+        throw new Error('Invalid response format');
+      }
+      
       setMonthly(res);
     } catch (error) {
-      console.log(error);
+      console.log("Error fetching monthly data:", error);
+      // setError(error.message);
+      // Set default state on error
+      setMonthly({
+        monthlyStats: {},
+        totalVisits: 0,
+        totalAmount: "0.00",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -398,9 +413,13 @@ export default function Home_screen({ route }) {
             <Text style={styles.emptyStateText}>No notes yet</Text>
           </View>
         )}
-        <View className="my-4">
-          {/* <MonthlyStatsChart data={monthly} /> */}
-        </View>
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#3b82f6" />
+        ) : error ? (
+          <Text style={styles.errorText}>{error}</Text>
+        ) : (
+          <MonthlyStatsChart data={monthly} />
+        )}
         <Modal
           transparent={true}
           visible={isMenuVisible}

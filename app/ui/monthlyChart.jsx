@@ -1,25 +1,40 @@
 import React from 'react';
-import { View, Text, Dimensions, ScrollView } from 'react-native';
+import { View, Text, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 
 // Function to get ordinal suffix
 const getOrdinalSuffix = (number) => {
   const j = number % 10;
   const k = number % 100;
-  if (j == 1 && k != 11) {
-    return number + "st";
-  }
-  if (j == 2 && k != 12) {
-    return number + "nd";
-  }
-  if (j == 3 && k != 13) {
-    return number + "rd";
-  }
+  if (j == 1 && k != 11) return number + "st";
+  if (j == 2 && k != 12) return number + "nd";
+  if (j == 3 && k != 13) return number + "rd";
   return number + "th";
 };
 
+// Validate monthly stats data
+const isValidMonthlyStats = (stats) => {
+  if (!stats || typeof stats !== 'object') return false;
+  return Object.values(stats).every(stat => 
+    stat && 
+    typeof stat === 'object' && 
+    'totalAmount' in stat &&
+    'totalVisits' in stat
+  );
+};
+
 const MonthlyStatsChart = ({ data }) => {
-  if (!data?.monthlyStats || Object.keys(data.monthlyStats).length === 0) {
+  // Enhanced data validation
+  if (!data) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Loading statistics...</Text>
+      </View>
+    );
+  }
+
+  // Validate monthlyStats structure
+  if (!data.monthlyStats || !isValidMonthlyStats(data.monthlyStats) || Object.keys(data.monthlyStats).length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>No statistics available</Text>
@@ -27,108 +42,125 @@ const MonthlyStatsChart = ({ data }) => {
     );
   }
 
-  // Transform data for the chart with ordinal month numbers
-  const barData = Object.entries(data.monthlyStats).map(([month, stats], index) => ({
-    value: stats?.totalAmount || 0,
-    label: getOrdinalSuffix(index + 1),  // Convert to "1st", "2nd", etc.
-    topLabelComponent: () => (
-      <Text style={styles.barTopLabel}>
-        ₹{(stats?.totalAmount || 0).toLocaleString()}
-      </Text>
-    ),
-    frontColor: '#3b82f6',
-    gradientColor: '#60a5fa',
-    labelTextStyle: styles.barLabel,
-    spacing: 12,
-    labelWidth: 40,
-  }));
+  // Safely transform data with error handling
+  try {
+    const barData = Object.entries(data.monthlyStats).map(([month, stats], index) => {
+      const amount = Number(stats?.totalAmount) || 0;
+      return {
+        value: amount,
+        label: getOrdinalSuffix(index + 1),
+        topLabelComponent: () => (
+          <Text style={styles.barTopLabel}>
+            ₹{amount.toLocaleString()}
+          </Text>
+        ),
+        frontColor: '#3b82f6',
+        gradientColor: '#60a5fa',
+        labelTextStyle: styles.barLabel,
+        spacing: 12,
+        labelWidth: 40,
+      };
+    });
 
-  const maxValue = Math.max(...barData.map(item => item.value));
-  const yAxisLabelCount = 5;
-  const roundedMax = Math.ceil(maxValue / 1000) * 1000;
+    const maxValue = Math.max(...barData.map(item => item.value), 1); // Ensure non-zero
+    const yAxisLabelCount = 5;
+    const roundedMax = Math.ceil(maxValue / 1000) * 1000;
 
-  return (
-    <View style={styles.scrollContainer}>
-      <View style={styles.container}>
-        {/* Header Stats */}
-        <View style={styles.headerCard}>
-          <Text style={styles.headerTitle}>Monthly Performance</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                ₹{(data.totalAmount || 0).toLocaleString()}
-              </Text>
-              <Text style={styles.statLabel}>Total Revenue</Text>
-            </View>
-            <View style={[styles.statItem, styles.borderLeft]}>
-              <Text style={styles.statValue}>
-                {(data.totalVisits || 0).toLocaleString()}
-              </Text>
-              <Text style={styles.statLabel}>Total Visits</Text>
+    return (
+      <ScrollView style={styles.scrollContainer}>
+        <View style={styles.container}>
+          {/* Header Stats */}
+          <View style={styles.headerCard}>
+            <Text style={styles.headerTitle}>Monthly Performance</Text>
+            <View style={styles.statsGrid}>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>
+                  ₹{(Number(data.totalAmount) || 0).toLocaleString()}
+                </Text>
+                <Text style={styles.statLabel}>Total Revenue</Text>
+              </View>
+              <View style={[styles.statItem, styles.borderLeft]}>
+                <Text style={styles.statValue}>
+                  {(Number(data.totalVisits) || 0).toLocaleString()}
+                </Text>
+                <Text style={styles.statLabel}>Total Visits</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Chart Section */}
-        <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>Revenue Trend</Text>
-          <View style={styles.chartWrapper}>
-            <BarChart
-              data={barData}
-              width={Dimensions.get('window').width - 60}
-              height={220}
-              barWidth={28}
-              spacing={24}
-              hideRules
-              xAxisColor={'#ddd'}
-              xAxisLength={250}
-              yAxisColor={'#ddd'}
-              yAxisTextStyle={styles.yAxisText}
-              noOfSections={yAxisLabelCount}
-              maxValue={roundedMax}
-              labelWidth={40}
-              barBorderRadius={6}
-              yAxisLabelWidth={60}
-              yAxisLabelPrefix="₹"
-              yAxisLabelSuffix="k"
-              formatYLabel={(label) => (parseInt(label) / 1000).toString()}
-              isAnimated
-              xAxisLabelTextStyle={styles.xAxisLabel}
-              renderTooltip={(item) => (
-                <View style={styles.tooltip}>
-                  <Text style={styles.tooltipText}>
-                    ₹{item.value.toLocaleString()}
+          {/* Chart Section */}
+          <View style={styles.chartCard}>
+            <Text style={styles.chartTitle}>Revenue Trend</Text>
+            <View style={styles.chartWrapper}>
+              {barData.length > 0 ? (
+                <BarChart
+                  data={barData}
+                  width={Dimensions.get('window').width - 60}
+                  height={220}
+                  barWidth={28}
+                  spacing={24}
+                  hideRules
+                  xAxisColor={'#ddd'}
+                  xAxisLength={250}
+                  yAxisColor={'#ddd'}
+                  yAxisTextStyle={styles.yAxisText}
+                  noOfSections={yAxisLabelCount}
+                  maxValue={roundedMax || 1000} // Ensure non-zero
+                  labelWidth={40}
+                  barBorderRadius={6}
+                  yAxisLabelWidth={60}
+                  yAxisLabelPrefix="₹"
+                  yAxisLabelSuffix="k"
+                  formatYLabel={(label) => (parseInt(label) / 1000).toString()}
+                  isAnimated
+                  xAxisLabelTextStyle={styles.xAxisLabel}
+                  renderTooltip={(item) => (
+                    <View style={styles.tooltip}>
+                      <Text style={styles.tooltipText}>
+                        ₹{item.value.toLocaleString()}
+                      </Text>
+                    </View>
+                  )}
+                />
+              ) : (
+                <Text style={styles.emptyText}>No chart data available</Text>
+              )}
+            </View>
+          </View>
+
+          {/* Monthly Breakdown */}
+          <View style={styles.breakdownCard}>
+            <Text style={styles.breakdownTitle}>Monthly Breakdown</Text>
+            {Object.entries(data.monthlyStats).map(([month, stats], index) => (
+              <View key={month} style={styles.breakdownRow}>
+                <View style={styles.monthContainer}>
+                  <Text style={styles.monthText}>
+                    {getOrdinalSuffix(index + 1)} Month
+                  </Text>
+                  <Text style={styles.visitText}>
+                    {Number(stats?.totalVisits || 0).toLocaleString()} visits
                   </Text>
                 </View>
-              )}
-            />
-          </View>
-        </View>
-
-        {/* Monthly Breakdown */}
-        <View style={styles.breakdownCard}>
-          <Text style={styles.breakdownTitle}>Monthly Breakdown</Text>
-          {Object.entries(data.monthlyStats).map(([month, stats], index) => (
-            <View key={month} style={styles.breakdownRow}>
-              <View style={styles.monthContainer}>
-                <Text style={styles.monthText}>
-                  {getOrdinalSuffix(index + 1)} Month
-                </Text>
-                <Text style={styles.visitText}>
-                  {stats?.totalVisits || 0} visits
+                <Text style={styles.amountText}>
+                  ₹{Number(stats?.totalAmount || 0).toLocaleString()}
                 </Text>
               </View>
-              <Text style={styles.amountText}>
-                ₹{(stats?.totalAmount || 0).toLocaleString()}
-              </Text>
-            </View>
-          ))}
+            ))}
+          </View>
         </View>
+      </ScrollView>
+    );
+  } catch (error) {
+    console.error('Error rendering MonthlyStatsChart:', error);
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Error loading statistics</Text>
       </View>
-    </View>
-  );
+    );
+  }
 };
 
+// ... (styles remain the same)
 const styles = {
   // ... (previous styles remain the same)
   xAxisLabel: {
